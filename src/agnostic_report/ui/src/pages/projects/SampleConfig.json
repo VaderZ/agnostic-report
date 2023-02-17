@@ -1,0 +1,421 @@
+{
+  "project": {
+    "tabs": [
+      {
+        "name": "Summary",
+        "layout": "FourTopDoubleLeftDoubleRight",
+        "widgets": [
+          {
+            "type": "ProjectTestsOverTime"
+          },
+          {
+            "type": "HTMLText",
+            "config": {
+              "html": "<div></div><h1>Machinarium</h1><br/><p>End-to-end tests of Holoplot Linux firmware on hardware Audio Modules.</p><br/><h2>Available setups</h2><p><ul style='list-style: disc; padding-left: 20px'><li>machinarium-1.holoplot.net (X1-MD96 Dante, Dev)</li><li>machinarium-2.holoplot.net (X1-MD96 Dante, CI)</li><li>machinarium-3.holoplot.net (X1-MD80-S Dante, CI)</li><li>machinarium-4.holoplot.net (X1-MD96 Ravenna, CI)</li></ul></p><br/><h2>Remote Access</h2><p><ul style='list-style: disc; padding-left: 20px'><li><b>SSH Port:</b>&nbsp;2022</li><li><b>RDP Port:</b>&nbsp;3389</li></ul></p><br/><h2>Inernal Network Devices</h2><p><ul style='list-style: disc; padding-left: 20px'><li><b>Router:</b>&nbsp;router.hw.local</li><li><b>Audio Switch:</b>&nbsp;switch-audio.hw.local</li><li><b>Audio Module:</b>&nbsp;speaker.hw.local</li><li><b>Test Runner (Linux):</b>&nbsp;controller.hw.local</li><li><b>Player Agent (Win):</b>&nbsp;player.hw.local</li><li><b>PDU</b>&nbsp;power.hw.local</li></ul></p><br/><h2>Cameras</h2><p><ul style='list-style: disc; padding-left: 20px'><li><b>Front:</b>&nbsp;rtsp://rbs-test-room-cam1.holoplot.net:554/s0</li><li><b>Back:</b>&nbsp;rtsp://rbs-test-room-cam2.holoplot.net:554/s0</li></ul></p></div>"
+            }
+          },
+          {
+            "type": "ProjectTopFailedTests",
+            "config": {
+              "count": 5
+            }
+          },
+          {
+            "type": "ProjectMetrics",
+            "config": {
+              "title": "Project Metrics",
+              "metrics": [
+                {
+                  "table": "metrics",
+                  "name": "boot.hard-reboot-after-update",
+                  "func": "avg",
+                  "filter": "> 0",
+                  "title": "Average boot time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics",
+                  "name": "firmware.total-update-time",
+                  "func": "avg",
+                  "filter": "> 0",
+                  "title": "Average update time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics_over_time",
+                  "name": "power_consumption",
+                  "field": "load",
+                  "func": "max",
+                  "title": "Maximum power (W)"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Test Runs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "ProjectTestRunsList",
+            "config": {
+              "columns": [
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%"
+                },
+                {
+                  "key": "sut_branch",
+                  "label": "Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "sut_version",
+                  "label": "Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "variant",
+                  "label": "Variant",
+                  "sortable": true,
+                  "width": "10%",
+                  "align": "right",
+                  "alignHead": "right",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_branch",
+                  "label": "Test Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_version",
+                  "label": "Test Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "tests",
+                  "label": "Total / Failed",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "5%"
+                },
+                {
+                  "key": "execution_time",
+                  "label": "Execution Time",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "start",
+                  "label": "Start",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "finish",
+                  "label": "Finish",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                }
+              ],
+              "variantFormat": ["type", "audio"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "testrun": {
+    "tabs": [
+      {
+        "name": "Summary",
+        "layout": "SixSingle",
+        "widgets": [
+          {
+            "type": "TestRunTestsByResult"
+          },
+          {
+            "type": "TestRunMetricsAndProperties",
+            "config": {
+              "title": "Key Info",
+              "metrics": [
+                {
+                  "table": "properties",
+                  "path": ["environment.test_bench"],
+                  "title": "Test bench"
+                },
+                {
+                  "table": "properties",
+                  "path": ["firmware.updated-from"],
+                  "title": "Updated from"
+                },
+                {
+                  "table": "metrics",
+                  "name": "boot.hard-reboot-after-update",
+                  "title": "Boot time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics",
+                  "name": "firmware.total-update-time",
+                  "title": "Update time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics_over_time",
+                  "name": "power_consumption",
+                  "field": "load",
+                  "func": "max",
+                  "title": "Peak power (W)"
+                }
+              ]
+            }
+          },
+          {
+            "type": "TestRunVariant",
+            "config": {
+              "title": "Variant",
+              "variants": [
+                {
+                  "key": "audio",
+                  "name": "Audio"
+                },
+                {
+                  "key": "type",
+                  "name": "Type"
+                }
+              ]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Electronics Package",
+              "path": ["environment.assembly-info", "ep"]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Speaker Package",
+              "path": ["environment.assembly-info", "sp"]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Sub Package",
+              "path": ["environment.assembly-info", "sublink-0"]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Tests",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestsRunTestsList"
+          }
+        ]
+      },
+      {
+        "name": "Metrics",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunMetricsList"
+          }
+        ]
+      },
+      {
+        "name": "Charts",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunOverTimeCharts",
+            "config": {
+              "defaultCharts": [0, 1],
+              "charts": [
+                {
+                  "name": "peak_levels",
+                  "title": "Peak Levels",
+                  "type": "line",
+                  "units": "dB",
+                  "series": [
+                    {
+                      "key": "post_eq_hf",
+                      "label": "post_eq_hf"
+                    },
+                    {
+                      "key": "post_eq_lf",
+                      "label": "post_eq_lf"
+                    },
+                    {
+                      "key": "post_eq_sub",
+                      "label": "post_eq_sub"
+                    },
+                    {
+                      "key": "pre_limiter_hf",
+                      "label": "pre_limiter_lf"
+                    },
+                    {
+                      "key": "pre_limiter_lf",
+                      "label": "pre_limiter_lf"
+                    },
+                    {
+                      "key": "pre_limiter_sub",
+                      "label": "pre_limiter_sub"
+                    }
+                  ]
+                },
+                {
+                  "name": "peak_levels",
+                  "title": "Peak Levels Message Rate",
+                  "type": "line",
+                  "units": "msg/s",
+                  "series": [
+                    {
+                      "key": "message_rate",
+                      "label": "Rate"
+                    }
+                  ]
+                },
+                {
+                  "name": "power_consumption",
+                  "title": "Power Consumption - Current",
+                  "type": "line",
+                  "units": "mA",
+                  "series": [
+                    {
+                      "key": "current",
+                      "label": "Current"
+                    }
+                  ]
+                },
+                {
+                  "name": "power_consumption",
+                  "title": "Power Consumption - Load",
+                  "type": "line",
+                  "units": "W",
+                  "series": [
+                    {
+                      "key": "load",
+                      "label": "RMS"
+                    }
+                  ]
+                },
+                {
+                  "name": "power_consumption",
+                  "title": "Power Consumption - Power Factor",
+                  "type": "line",
+                  "units": "θ",
+                  "series": [
+                    {
+                      "key": "power_factor",
+                      "label": "Power Factor"
+                    }
+                  ]
+                },
+                {
+                  "name": "power_consumption",
+                  "title": "Power Consumption - Voltage",
+                  "type": "line",
+                  "units": "V",
+                  "series": [
+                    {
+                      "key": "voltage",
+                      "label": "Voltage"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Progress",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunProgress"
+          }
+        ]
+      },
+      {
+        "name": "Logs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunLogsList"
+          }
+        ]
+      }
+    ]
+  }
+}

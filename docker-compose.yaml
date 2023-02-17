@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    environment:
+      POSTGRES_PASSWORD: ${AGNOSTIC_DB_PASSWORD}
+      DB_NAME: ${AGNOSTIC_DB_NAME}
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - internal
+  agnostic:
+    container_name: agnostic
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./docker/deployment/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      AGNOSTIC_DB_USERNAME: ${AGNOSTIC_DB_USERNAME}
+      AGNOSTIC_DB_PASSWORD: ${AGNOSTIC_DB_PASSWORD}
+      AGNOSTIC_DB_HOST: db
+      AGNOSTIC_DB_PORT: ${AGNOSTIC_DB_PORT}
+      AGNOSTIC_DB_NAME: ${AGNOSTIC_DB_NAME}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY}
+    networks:
+      - internal
+networks:
+  internal:
+volumes:
+  pgdata:

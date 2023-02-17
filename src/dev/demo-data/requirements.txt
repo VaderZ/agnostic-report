@@ -1,0 +1,2 @@
+-r ../../../requirements.txt
+lorem==0.1.1

@@ -1,0 +1,380 @@
+{
+  "project": {
+    "tabs": [
+      {
+        "name": "Summary",
+        "layout": "FourTopDoubleLeftDoubleRight",
+        "widgets": [
+          {
+            "type": "ProjectTestsOverTime"
+          },
+          {
+            "type": "HTMLText",
+            "config": {
+              "html": "<div></div><h1>Rich Configuration Project</h1><br/><p>Demo project with some random data for development and testing.</p><br/><h2>Some Links</h2><p><ul style='list-style: disc; padding-left: 20px'><li><a href='https://example.com'>Example</a></li><li><a href='https://google.com'>Google</a></li><br/><h2>Lorem Ipsum</h2><p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea com.</p>"
+            }
+          },
+          {
+            "type": "ProjectTopFailedTests",
+            "config": {
+              "count": 5
+            }
+          },
+          {
+            "type": "ProjectMetrics",
+            "config": {
+              "title": "Project Metrics",
+              "metrics": [
+                {
+                  "table": "metrics",
+                  "name": "power.suspend.consumption",
+                  "func": "avg",
+                  "filter": "> 0",
+                  "title": "Average suspend consumption (mW)",
+                  "format": "float"
+                },
+                {
+                  "table": "metrics",
+                  "name": "firmware.time-to-apply-update",
+                  "func": "avg",
+                  "filter": "> 0",
+                  "title": "Average update time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics_over_time",
+                  "name": "compute-consumption",
+                  "field": "ram_percent",
+                  "func": "max",
+                  "title": "Maximum % RAM"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Test Runs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "ProjectTestRunsList",
+            "config": {
+              "columns": [
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%"
+                },
+                {
+                  "key": "sut_branch",
+                  "label": "Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "sut_version",
+                  "label": "Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "variant",
+                  "label": "Variant",
+                  "sortable": true,
+                  "width": "10%",
+                  "align": "right",
+                  "alignHead": "right",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_branch",
+                  "label": "Test Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_version",
+                  "label": "Test Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "tests",
+                  "label": "Total / Failed",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "5%"
+                },
+                {
+                  "key": "execution_time",
+                  "label": "Execution Time",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "start",
+                  "label": "Start",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "finish",
+                  "label": "Finish",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                }
+              ],
+              "variantFormat": ["OS", "architecture"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "testrun": {
+    "tabs": [
+      {
+        "name": "Summary",
+        "layout": "SixSingle",
+        "widgets": [
+          {
+            "type": "TestRunTestsByResult"
+          },
+          {
+            "type": "TestRunMetricsAndProperties",
+            "config": {
+              "title": "Key Info",
+              "metrics": [
+                {
+                  "table": "properties",
+                  "path": ["environment", "test-bench", "revision"],
+                  "title": "Test bench"
+                },
+                {
+                  "table": "properties",
+                  "path": ["firmware", "updated-from"],
+                  "title": "Updated from"
+                },
+                {
+                  "table": "metrics",
+                  "name": "compute.parallel-workers",
+                  "title": "Parallel workers"
+                },
+                {
+                  "table": "metrics",
+                  "name": "firmware.total-update-time",
+                  "title": "Update time",
+                  "format": "interval"
+                },
+                {
+                  "table": "metrics_over_time",
+                  "name": "power-consumption",
+                  "field": "power_consumption",
+                  "func": "max",
+                  "title": "Peak power (W)"
+                }
+              ]
+            }
+          },
+          {
+            "type": "TestRunVariant",
+            "config": {
+              "title": "Variant",
+              "variants": [
+                {
+                  "key": "OS",
+                  "name": "Operating System"
+                },
+                {
+                  "key": "architecture",
+                  "name": "Architecture"
+                }
+              ]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Deployment Details",
+              "path": ["deployment", "paths"]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Test Filters",
+              "path": ["tests", "config", "filters"]
+            }
+          },
+          {
+            "type": "TestRunJSONProperty",
+            "config": {
+              "title": "Test Options",
+              "path": ["tests", "config", "settings"]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Tests",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestsRunTestsList"
+          }
+        ]
+      },
+      {
+        "name": "Metrics",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunMetricsList"
+          }
+        ]
+      },
+      {
+        "name": "Charts",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunOverTimeCharts",
+            "config": {
+              "defaultCharts": [0, 1],
+              "charts": [
+                {
+                  "name": "compute-consumption",
+                  "title": "CPU Utilization",
+                  "type": "line",
+                  "units": "%",
+                  "series": [
+                    {
+                      "key": "cpu_percent",
+                      "label": "System"
+                    },
+                    {
+                      "key": "cpu_percent_process",
+                      "label": "Application"
+                    }
+                  ]
+                },
+                {
+                  "name": "compute-consumption",
+                  "title": "RAM Utilization",
+                  "type": "line",
+                  "units": "%",
+                  "series": [
+                    {
+                      "key": "ram_percent",
+                      "label": "System"
+                    }
+                  ]
+                },
+                {
+                  "name": "power-consumption",
+                  "title": "Power Consumption - Load",
+                  "type": "line",
+                  "units": "W",
+                  "series": [
+                    {
+                      "key": "power_consumption",
+                      "label": "RMS"
+                    }
+                  ]
+                },
+                {
+                  "name": "power-consumption",
+                  "title": "Power Consumption - Power Factor",
+                  "type": "line",
+                  "units": "W",
+                  "series": [
+                    {
+                      "key": "power_factor",
+                      "label": "Power Factor"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Progress",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunProgress"
+          }
+        ]
+      },
+      {
+        "name": "Logs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunLogsList"
+          }
+        ]
+      }
+    ]
+  }
+}

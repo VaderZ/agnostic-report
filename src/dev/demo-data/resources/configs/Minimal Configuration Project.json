@@ -1,0 +1,162 @@
+{
+  "project": {
+    "tabs": [
+      {
+        "name": "Test Runs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "ProjectTestRunsList",
+            "config": {
+              "columns": [
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%"
+                },
+                {
+                  "key": "sut_branch",
+                  "label": "Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "sut_version",
+                  "label": "Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "variant",
+                  "label": "Variant",
+                  "sortable": true,
+                  "width": "10%",
+                  "align": "right",
+                  "alignHead": "right",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_branch",
+                  "label": "Test Branch",
+                  "sortable": true,
+                  "align": "left",
+                  "alignHead": "left",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "test_version",
+                  "label": "Test Version",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "tests",
+                  "label": "Total / Failed",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "5%"
+                },
+                {
+                  "key": "execution_time",
+                  "label": "Execution Time",
+                  "sortable": true,
+                  "align": "center",
+                  "alignHead": "center",
+                  "width": "5%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "50px"
+                  }
+                },
+                {
+                  "key": "start",
+                  "label": "Start",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                },
+                {
+                  "key": "finish",
+                  "label": "Finish",
+                  "sortable": true,
+                  "align": "right",
+                  "alignHead": "right",
+                  "width": "10%",
+                  "style": {
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "maxWidth": "100px"
+                  }
+                }
+              ],
+              "variantFormat": ["OS", "architecture"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "testrun": {
+    "tabs": [
+      {
+        "name": "Tests",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestsRunTestsList"
+          }
+        ]
+      },
+      {
+        "name": "Logs",
+        "layout": "FullPage",
+        "widgets": [
+          {
+            "type": "TestRunLogsList"
+          }
+        ]
+      }
+    ]
+  }
+}
