@@ -429,7 +429,7 @@ class Reporting:
             and_(*tr_filters)
         ).group_by(
             models.TestRun.id
-        ).subquery()
+        )
 
         metrics_sql = []
         metrics_ot_sql = []
@@ -917,7 +917,7 @@ class Reporting:
             func.distinct(models.Test.id)
         ).where(
             and_(*test_filters)
-        ).subquery()
+        )
 
         metrics_sql = []
         properties_sql = []
