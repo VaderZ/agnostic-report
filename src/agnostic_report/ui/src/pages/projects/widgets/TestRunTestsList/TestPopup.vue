@@ -225,15 +225,15 @@
             <va-data-table :items="testRequestsSQL" :columns="testRequestsSQLColumns" animated hoverable>
               <template #cell(request)="{ rowData }">
                 <DownloadableCell
-                  :content="rowData.response"
-                  :file-name="`SQL-Request`"
+                  :content="rowData.query"
+                  :file-name="`SQL-Query`"
                   :limit="1000"
                 ></DownloadableCell>
               </template>
               <template #cell(response)="{ rowData }">
                 <DownloadableCell
-                  :content="rowData.response"
-                  :file-name="`SQL-Response`"
+                  :content="rowData.result"
+                  :file-name="`SQL-Result`"
                   :limit="1000"
                 ></DownloadableCell>
               </template>
@@ -461,8 +461,8 @@
       width: '10%',
     },
     {
-      key: 'request',
-      label: 'Request',
+      key: 'query',
+      label: 'Query',
       sortable: false,
       align: 'left',
       alignHead: 'left',
@@ -470,8 +470,8 @@
       width: '45%',
     },
     {
-      key: 'response',
-      label: 'Response',
+      key: 'result',
+      label: 'Result',
       sortable: false,
       align: 'left',
       alignHead: 'left',
