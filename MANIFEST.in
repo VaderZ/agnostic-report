@@ -1,3 +1,0 @@
-include VERSION
-include src/agnostic_report/alembic.ini
-recursive-include src/agnostic_report/ui/dist *

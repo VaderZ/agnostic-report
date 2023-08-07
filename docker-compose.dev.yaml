@@ -45,13 +45,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    image: python:3.11.1
+    image: python:3.11.4
     volumes:
       - type: bind
         source: ./
         target: /opt/agnostic
     ports:
-      - "8000:8000"
+      - "800:8000"
     environment:
       AGNOSTIC_DB_USERNAME: ${AGNOSTIC_DB_USERNAME}
       AGNOSTIC_DB_PASSWORD: ${AGNOSTIC_DB_PASSWORD}
@@ -61,7 +61,7 @@ services:
       AGNOSTIC_PRODUCTION: False
       WEB_CONCURRENCY: ${WEB_CONCURRENCY}
     command: >
-      bash -c "cd /opt/agnostic/src && python3 -m pip install -r ../requirements.txt && python3 run.py"
+      bash -c "cd /opt/agnostic && python3 -m pip install -e ./agnostic-web && uvicorn agnostic.web.api:app --reload --reload-dir /opt/agnostic/agnostic-web --reload-dir /opt/agnostic/agnostic-core"
     networks:
       - internal
   ui:
@@ -69,7 +69,7 @@ services:
     depends_on:
       api:
         condition: service_started
-    image: node:14
+    image: node:18
     volumes:
       - type: bind
         source: ./
@@ -85,7 +85,7 @@ services:
       AGNOSTIC_PRODUCTION: False
       VITE_API_URL: http://localhost:8000/api/v1
     command: >
-      bash -c "cd /opt/agnostic/src/agnostic_report/ui && npm config set prefix \"$HOME/tmp/container/node_modules\" && npm install && npm run dev"
+      bash -c "cd /opt/agnostic/agnostic-web-ui && npm config set prefix \"$HOME/tmp/container/node_modules\" && npm install && npm run dev"
     networks:
       - internal
 networks:

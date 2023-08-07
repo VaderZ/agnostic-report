@@ -1,4 +1,4 @@
 .idea/
 venv/
-ui/node_modules/
+agnostic-web-ui/node_modules/
 tmp/
