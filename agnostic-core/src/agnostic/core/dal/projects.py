@@ -24,7 +24,7 @@ class Projects:
         if not project:
             raise NotFoundError(f'Project {id} does not exist')
 
-        return schemas.Project.from_orm(project)
+        return schemas.Project.model_validate(project)
 
     async def get_all(self) -> [schemas.Project]:
         projects = (
@@ -32,11 +32,11 @@ class Projects:
                 select(models.Project)
             )
         ).scalars().all()
-        return [schemas.Project.from_orm(project) for project in projects]
+        return [schemas.Project.model_validate(project) for project in projects]
 
-    async def create(self, project: schemas.Project) -> UUID:
+    async def create(self, project: schemas.ProjectCreate) -> UUID:
         project.id = project.id or uuid4()
-        project = models.Project(**project.dict())
+        project = models.Project(**project.model_dump())
         self.session.add(project)
 
         try:
@@ -51,7 +51,7 @@ class Projects:
             result = await self.session.execute(
                 update(models.Project)
                 .where(models.Project.id == project.id)
-                .values(**project.dict(exclude_unset=exclude_unset))
+                .values(**project.model_dump(exclude_unset=exclude_unset))
             )
             await self.session.commit()
         except IntegrityError:

@@ -33,7 +33,7 @@ if not ui_dist.is_dir() and not package_dist.is_dir():
 setup(
     install_requires=[
         f'agnostic-core @ file://{os.path.join(os.path.dirname(__file__), "..", "agnostic-core")}',
-        'fastapi>=0.89.1,<0.100.0',
+        'fastapi>=0.101.0,<0.200.0',
         'uvicorn[standard]>=0.20.0,<1.0',
         'python-multipart>=0.0.5,<1.0'
     ]

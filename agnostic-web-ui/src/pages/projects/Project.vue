@@ -98,7 +98,7 @@
   const readProjectDetails = () => {
     return axios.get(`/projects/${route.params.project}`).then((response) => {
       projectName.value = response.data.name
-      config.value = response.data.config ? response.data.config : defaultProjectConfig
+      config.value = response.data.config && Object.keys(response.data.config).length > 0 ? response.data.config : defaultProjectConfig
     })
   }
 

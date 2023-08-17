@@ -73,7 +73,7 @@ class Context:
         try:
             return datetime.datetime.fromisoformat(self.get_key('test_finish'))
         except TypeError:
-            None
+            ...
 
     @test_finish.setter
     def test_finish(self, value: datetime.datetime):
@@ -393,6 +393,7 @@ class Client:
     def add_progress(self, level: schemas.Level, message: str,
                      details: str | None = None, test_id: UUID | None = None):
         data = schemas.Progress(
+            id=uuid.uuid4(),
             test_run_id=self.ctx.test_run_id,
             test_id=test_id or self.ctx.test_id,
             level=level,

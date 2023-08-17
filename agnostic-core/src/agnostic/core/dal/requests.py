@@ -26,7 +26,7 @@ class Requests:
         if not metric:
             raise NotFoundError(f'Request {id} does not exist')
 
-        return schemas.Request.from_orm(metric)
+        return schemas.Request.model_validate(metric)
 
     async def get_all(self, test_id: UUID) -> List[schemas.Request]:
         requests = (await self.session.execute(
@@ -34,12 +34,12 @@ class Requests:
             .where(models.Request.test_id == test_id)
         ))
 
-        return [schemas.Request.from_orm(request) for request in requests]
+        return [schemas.Request.model_validate(request) for request in requests]
 
     async def create(self, request: schemas.RequestCreate) -> UUID:
         request.id = request.id or uuid4()
         request.timestamp = request.timestamp or datetime.datetime.utcnow()
-        request = models.Request(**request.dict())
+        request = models.Request(**request.model_dump())
         self.session.add(request)
 
         try:
@@ -58,7 +58,7 @@ class Requests:
                 await self.session.execute(
                     update(models.Request)
                     .where(models.Request.id == request.id)
-                    .values(**request.dict(exclude_unset=exclude_unset))
+                    .values(**request.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

@@ -21,7 +21,7 @@ async def create_project(project: schemas.ProjectCreate, response: Response,
 
 
 @router.put('/projects/{project_id}')
-async def update_project(project: schemas.Project, project_id: UUID,
+async def update_project(project: schemas.ProjectCreate, project_id: UUID,
                          response: Response, projects: dal.Projects = Depends(dal.get_projects)):
     project.id = project_id
     try:

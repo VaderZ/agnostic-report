@@ -25,7 +25,7 @@ class Tests:
         if not test:
             raise NotFoundError(f'Test {id} does not exist')
 
-        return schemas.Test.from_orm(test)
+        return schemas.Test.model_validate(test)
 
     async def get_all(self, test_run_id: UUID) -> [schemas.TestRun]:
         tests = (
@@ -34,12 +34,12 @@ class Tests:
                 .where(models.Test.test_run_id == test_run_id)
             )).scalars().all()
 
-        return [schemas.Test.from_orm(test) for test in tests]
+        return [schemas.Test.model_validate(test) for test in tests]
 
     async def create(self, test: schemas.Test) -> UUID:
         test.id = test.id or uuid4()
         test.start = test.start or datetime.datetime.utcnow()
-        test = models.Test(**test.dict())
+        test = models.Test(**test.model_dump())
         self.session.add(test)
 
         try:
@@ -58,7 +58,7 @@ class Tests:
                 await self.session.execute(
                     update(models.Test)
                     .where(models.Test.id == test.id)
-                    .values(**test.dict(exclude_unset=exclude_unset))
+                    .values(**test.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

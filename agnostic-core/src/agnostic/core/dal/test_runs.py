@@ -79,7 +79,7 @@ class TestRuns:
         if not test_run:
             raise NotFoundError(f'Test Run {id} does not exist')
 
-        test_run = schemas.TestRun.from_orm(test_run)
+        test_run = schemas.TestRun.model_validate(test_run)
         try:
             test_run.variant = (await self.__get_variant(id))[id]
         except KeyError:
@@ -106,7 +106,7 @@ class TestRuns:
         test_run.start = test_run.start or datetime.datetime.utcnow()
         test_run.heartbeat = test_run.heartbeat or datetime.datetime.utcnow()
         variant = test_run.variant
-        test_run = models.TestRun(**test_run.dict(exclude={'variant'}))
+        test_run = models.TestRun(**test_run.model_dump(exclude={'variant'}))
         self.session.add(test_run)
 
         if variant is not None:
@@ -128,7 +128,7 @@ class TestRuns:
                 await self.session.execute(
                     update(models.TestRun)
                     .where(models.TestRun.id == test_run.id)
-                    .values(**test_run.dict(exclude={'variant'}, exclude_unset=exclude_unset))
+                    .values(**test_run.model_dump(exclude={'variant'}, exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

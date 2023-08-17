@@ -1,11 +1,34 @@
-__all__ = ['Base']
-from uuid import UUID
+__all__ = ['Base', 'Timestamp', 'KeyValue', 'StringValue', 'Paginator']
 
-from pydantic import BaseModel
+import datetime
+import typing
+
+from pydantic import BaseModel, ConfigDict
 
 
 class Base(BaseModel):
-    id: UUID | None
+    model_config = ConfigDict(
+        from_attributes=True,
+        validate_assignment=True
+    )
 
-    class Config:
-        orm_mode = True
+
+class Timestamp(BaseModel):
+    timestamp: datetime.datetime | None
+
+
+class KeyValue(BaseModel):
+    key: str
+    value: typing.Any
+
+
+class StringValue(BaseModel):
+    value: str
+
+
+class Paginator(Base):
+    data: list[Base]
+    count: int
+    pages: int
+    page: int
+    page_size: int

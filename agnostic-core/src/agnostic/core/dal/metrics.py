@@ -25,7 +25,7 @@ class Metrics:
         if not metric:
             raise NotFoundError(f'Metric {id} does not exist')
 
-        return schemas.Metric.from_orm(metric)
+        return schemas.Metric.model_validate(metric)
 
     async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.Metric]:
         if not test_run_id and not test_id:
@@ -41,12 +41,12 @@ class Metrics:
 
         metrics = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Metric.from_orm(metric) for metric in metrics]
+        return [schemas.Metric.model_validate(metric) for metric in metrics]
 
     async def create(self, metric: schemas.MetricCreate) -> UUID:
         metric.id = metric.id or uuid4()
         metric.timestamp = metric.timestamp or datetime.datetime.utcnow()
-        metric = models.Metric(**metric.dict())
+        metric = models.Metric(**metric.model_dump())
         self.session.add(metric)
 
         try:
@@ -65,7 +65,7 @@ class Metrics:
                 await self.session.execute(
                     update(models.Metric)
                     .where(models.Metric.id == metric.id)
-                    .values(**metric.dict(exclude_unset=exclude_unset))
+                    .values(**metric.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:
