@@ -8,7 +8,7 @@ FROM python:3.11.4 as fat
 
 ADD /agnostic-core /opt/deploy/agnostic-core
 ADD /agnostic-web /opt/deploy/agnostic-web
-COPY --from=ui /opt/deploy/agnostic-web-ui/dist /opt/deploy/agnostic-web/ui
+COPY --from=ui /opt/deploy/agnostic-web-ui/dist /opt/deploy/agnostic-web/src/agnostic/web/ui
 
 RUN python3 -m pip install -U pip
 RUN cd /opt/deploy && pip install ./agnostic-web
