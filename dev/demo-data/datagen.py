@@ -19,7 +19,7 @@ from sqlalchemy.orm import sessionmaker
 base_folder = Path(__file__).parent
 sys.path.insert(0, str(base_folder.parent.parent))
 
-from agnostic_report.db.models import Project, TestRun, Test, TestRunVariant, Log, Progress, \
+from agnostic.core.models import Project, TestRun, Test, TestRunVariant, Log, Progress, \
     Metric, MetricOverTime, Attachment, Request
 
 postgres_url = None
