@@ -39,7 +39,7 @@ class Requests:
     async def create(self, request: schemas.RequestCreate) -> UUID:
         request.id = request.id or uuid4()
         request.timestamp = request.timestamp or datetime.datetime.utcnow()
-        request = models.Request(**request.model_dump())
+        request = models.Request(**request.model_dump(), request_type=request.contents.request_type)
         self.session.add(request)
 
         try:

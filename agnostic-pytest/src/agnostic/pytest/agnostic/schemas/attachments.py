@@ -19,7 +19,8 @@ class Attachment(Base):
 
 
 class AttachmentCreate(Attachment):
+    id: uuid.UUID | None = None
     name: constr(strip_whitespace=True, max_length=512)
     mime_type: constr(strip_whitespace=True, max_length=128)
-    size: int | None
+    size: int | None = None
     content: bytes

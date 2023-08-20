@@ -3,6 +3,7 @@ import datetime
 import uuid
 
 from ..base import Base, Paginator
+from pydantic import Field
 
 
 class TestReport(Base):
@@ -18,7 +19,7 @@ class TestsStatistics(Base):
     result: str | None = None
     name: str | None = None
     path: str | None = None
-    execution_time: datetime.timedelta | None = None
+    execution_time: datetime.timedelta | None = Field(None)
 
 
 class PagedTests(Paginator):

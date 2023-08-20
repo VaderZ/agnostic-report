@@ -118,7 +118,7 @@ def pytest_runtest_makereport(item, call):
             try:
                 reason = rep.longrepr[-1].split(': ')[-1]
                 _agnostic_hooked.finish_test(_agnostic.TestResult.SKIPPED, reason=reason)
-            except Exception:
+            except Exception: # noqa
                 pass
         elif rep.failed:
             _agnostic_hooked.finish_test(_agnostic.TestResult.FAILED, error_message=rep.longreprtext)

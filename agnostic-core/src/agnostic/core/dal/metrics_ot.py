@@ -43,7 +43,7 @@ class MetricsOverTime:
 
         return [schemas.MetricOverTime.model_validate(metric) for metric in metrics]
 
-    async def create(self, metric: schemas.MetricOverTime) -> UUID:
+    async def create(self, metric: schemas.MetricOverTimeCreate) -> UUID:
         metric.id = metric.id or uuid4()
         metric.timestamp = metric.timestamp or datetime.datetime.utcnow()
         metric = models.MetricOverTime(**metric.model_dump())

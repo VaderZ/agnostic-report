@@ -7,23 +7,9 @@ import datetime
 import uuid
 
 from pydantic import Field, constr
-
+from typing import Literal
 from .base import Base
 from .lookups import RequestType
-
-
-class Request(Base):
-    id: uuid.UUID
-    test_run_id: uuid.UUID | None = None
-    test_id: uuid.UUID | None = None
-    timestamp: datetime.datetime | None = None
-    request_type: RequestType | constr(strip_whitespace=True, max_length=128) | None = None
-    contents: dict | None = Field(None, exclude={'request_type'})
-
-
-class RequestCreate(Request):
-    request_type: RequestType | constr(strip_whitespace=True, max_length=128)
-    contents: dict = Field(..., exclude={'request_type'})
 
 
 class RequestContents(Base):
@@ -31,7 +17,7 @@ class RequestContents(Base):
 
 
 class RequestHTTP(RequestContents):
-    request_type: RequestType = RequestType.HTTP
+    request_type: Literal[RequestType.HTTP] = RequestType.HTTP
     code: int | None = None
     method: str
     url: str
@@ -42,7 +28,7 @@ class RequestHTTP(RequestContents):
 
 
 class RequestGRPC(RequestContents):
-    request_type: RequestType = RequestType.GRPC
+    request_type: Literal[RequestType.GRPC] = RequestType.GRPC
     method: str
     elapsed: float | None = None
     request: str
@@ -50,15 +36,29 @@ class RequestGRPC(RequestContents):
 
 
 class RequestSQL(RequestContents):
-    request_type: RequestType = RequestType.SQL
+    request_type: Literal[RequestType.SQL] = RequestType.SQL
     query: str
     result: str
     elapsed: float
 
 
 class RequestNATS(RequestContents):
-    request_type: RequestType = RequestType.NATS
+    request_type: Literal[RequestType.NATS] = RequestType.NATS
     method: str
     subject: str
     payload: str
-    
+
+
+class Request(Base):
+    id: uuid.UUID
+    test_run_id: uuid.UUID | None = None
+    test_id: uuid.UUID | None = None
+    timestamp: datetime.datetime | None = None
+    # request_type: RequestType | constr(strip_whitespace=True, max_length=128) | None = None
+    contents: RequestHTTP | RequestGRPC | RequestSQL | RequestNATS | None = Field(None, discriminator='request_type')
+
+
+class RequestCreate(Request):
+    # request_type: RequestType | constr(strip_whitespace=True, max_length=128)
+    id: uuid.UUID | None = None
+    contents: RequestHTTP | RequestGRPC | RequestSQL | RequestNATS = Field(..., discriminator='request_type')
