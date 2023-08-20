@@ -1,4 +1,4 @@
-FROM node:14 as ui
+FROM node:18 as ui
 
 ADD /agnostic-web-ui /opt/deploy/agnostic-web-ui
 
