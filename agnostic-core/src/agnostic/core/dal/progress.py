@@ -25,7 +25,7 @@ class Progress:
         if not progress:
             raise NotFoundError(f'Progress record {id} does not exist')
 
-        return schemas.Progress.from_orm(progress)
+        return schemas.Progress.model_validate(progress)
 
     async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.Progress]:
         if not test_run_id and not test_id:
@@ -41,12 +41,12 @@ class Progress:
 
         progresses = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Progress.from_orm(progress) for progress in progresses]
+        return [schemas.Progress.model_validate(progress) for progress in progresses]
 
     async def create(self, progress: schemas.ProgressCreate) -> UUID:
         progress.id = progress.id or uuid4()
         progress.timestamp = progress.timestamp or datetime.datetime.utcnow()
-        progress = models.Progress(**progress.dict())
+        progress = models.Progress(**progress.model_dump())
         self.session.add(progress)
 
         try:
@@ -65,7 +65,7 @@ class Progress:
                 await self.session.execute(
                     update(models.Progress)
                     .where(models.Progress.id == progress.id)
-                    .values(**progress.dict(exclude_unset=exclude_unset))
+                    .values(**progress.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

@@ -27,7 +27,7 @@ class Logs:
         if not log:
             raise NotFoundError(f'Log {id} does not exist')
 
-        return schemas.Log.from_orm(log)
+        return schemas.Log.model_validate(log)
 
     async def get_body(self, id: UUID, offset: int | None = None, limit: int | None = None) -> str:
         args = [offset or 0]
@@ -62,12 +62,12 @@ class Logs:
 
         logs = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Log.from_orm(log) for log in logs]
+        return [schemas.Log.model_validate(log) for log in logs]
 
     async def create(self, log: schemas.LogCreate) -> UUID:
         log.id = log.id or uuid4()
         log.start = log.start or datetime.datetime.utcnow()
-        log = models.Log(**log.dict())
+        log = models.Log(**log.model_dump())
         self.session.add(log)
 
         try:
@@ -86,7 +86,7 @@ class Logs:
                 await self.session.execute(
                     update(models.Log)
                     .where(models.Log.id == log.id)
-                    .values(**log.dict(exclude_unset=exclude_unset))
+                    .values(**log.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

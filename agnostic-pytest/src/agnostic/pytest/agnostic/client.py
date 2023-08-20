@@ -4,8 +4,7 @@ import mimetypes
 import os
 import uuid
 from decimal import Decimal
-from io import BufferedReader
-from typing import Any
+from typing import Any, IO
 from uuid import UUID, uuid4
 
 import redis
@@ -73,7 +72,7 @@ class Context:
         try:
             return datetime.datetime.fromisoformat(self.get_key('test_finish'))
         except TypeError:
-            None
+            ...
 
     @test_finish.setter
     def test_finish(self, value: datetime.datetime):
@@ -264,7 +263,7 @@ class Client:
             project_id=self.ctx.project_id,
             **locals()
         )
-        self.http.post(f'/test-runs', data.json(exclude_unset=True))
+        self.http.post(f'/test-runs', data.model_dump_json(exclude_unset=True))
         return self.ctx.test_run_id
 
     def finish_test_run(self):
@@ -272,7 +271,7 @@ class Client:
             id=self.ctx.test_run_id,
             project_id=self.ctx.project_id
         )
-        self.http.post(f'{self.test_run_path}/finish', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/finish', data.model_dump_json(exclude_unset=True))
         self.ctx.test_run_id = None
 
     def test_run_heartbeat(self):
@@ -280,15 +279,13 @@ class Client:
             id=self.ctx.test_run_id,
             project_id=self.ctx.project_id
         )
-        self.http.post(f'{self.test_run_path}/heartbeat', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/heartbeat', data.model_dump_json(exclude_unset=True))
 
-    def set_test_run_property(self, key: str, value: str):
+    def set_test_run_property(self, key: str, value: str | float | dict):
         data = schemas.KeyValue(
-            id=self.ctx.test_run_id,
-            project_id=self.ctx.project_id,
             **locals()
         )
-        self.http.post(f'{self.test_run_path}/property', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/property', data.model_dump_json(exclude_unset=True))
 
     def start_test(self, name: str, path: str, description: str = None):
         self.ctx.test_id = uuid4()
@@ -298,7 +295,7 @@ class Client:
             test_run_id=self.ctx.test_run_id,
             **locals()
         )
-        self.http.post(f'{self.test_run_path}/tests', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/tests', data.model_dump_json(exclude_unset=True))
 
     def finish_test(self, result: schemas.TestResult, reason: str = None,
                     error_message: str = None, test_id: UUID | None = None):
@@ -311,23 +308,27 @@ class Client:
             test_run_id=self.ctx.test_run_id,
             **locals()
         )
-        self.http.post(f'{self.get_test_path(test_id)}/finish', data.json(exclude_unset=True))
+        self.http.post(f'{self.get_test_path(test_id)}/finish', data.model_dump_json(exclude_unset=True))
 
-    def add_test_metric(self, name: str, value: Decimal, description: str = None, test_id: UUID | None = None):
+    def add_test_metric(self, name: str, value: Decimal | float, description: str = None, test_id: UUID | None = None):
         test_id = test_id or self.ctx.test_id
-        data = schemas.Metric(
+        data = schemas.MetricCreate(
             test_run_id=self.ctx.test_run_id,
-            **locals()
+            name=name,
+            value=value,
+            description=description
         )
-        self.http.post(f'{self.get_test_path(test_id)}/metrics', data.json(exclude_unset=True))
+        self.http.post(f'{self.get_test_path(test_id)}/metrics', data.model_dump_json(exclude_unset=True))
 
-    def add_test_run_metric(self, name: str, value: Decimal, description: str = None):
-        data = schemas.Metric(
+    def add_test_run_metric(self, name: str, value: Decimal | float, description: str = None):
+        data = schemas.MetricCreate(
             test_id=self.ctx.test_id,
             test_run_id=self.ctx.test_run_id,
-            **locals()
+            name=name,
+            value=value,
+            description=description
         )
-        self.http.post(f'{self.test_run_path}/metrics', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/metrics', data.model_dump_json(exclude_unset=True))
 
     def add_test_run_log(self, name: str, body: str,
                          start: datetime.datetime = None, finish: datetime.datetime = None) -> UUID:
@@ -337,14 +338,14 @@ class Client:
             test_run_id=self.ctx.test_run_id,
             **locals()
         )
-        self.http.post(f'{self.test_run_path}/logs', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/logs', data.model_dump_json(exclude_unset=True))
         return log_id
 
     def append_test_run_log(self, log_id: UUID, body: str):
         data = schemas.StringValue(
             value=body
         )
-        self.http.patch(f'{self.test_run_path}/logs/{log_id}/body', data.json(exclude_unset=True))
+        self.http.patch(f'{self.test_run_path}/logs/{log_id}/body', data.model_dump_json(exclude_unset=True))
 
     def add_test_log(self, name: str, body: str, start: datetime.datetime = None,
                      finish: datetime.datetime = None, test_id: UUID | None = None) -> UUID:
@@ -355,7 +356,7 @@ class Client:
             test_run_id=self.ctx.test_run_id,
             **locals()
         )
-        self.http.post(f'{self.get_test_path(test_id)}/logs', data.json(exclude_unset=True))
+        self.http.post(f'{self.get_test_path(test_id)}/logs', data.model_dump_json(exclude_unset=True))
         return log_id
 
     def append_test_log(self, log_id, body: str, test_id: UUID | None = None):
@@ -363,43 +364,57 @@ class Client:
         data = schemas.StringValue(
             value=body
         )
-        self.http.patch(f'{self.get_test_path(test_id)}/logs/{log_id}/body', data.json(exclude_unset=True))
+        self.http.patch(f'{self.get_test_path(test_id)}/logs/{log_id}/body', data.model_dump_json(exclude_unset=True))
 
-    def add_request(self, contents: schemas.RequestContents, timestamp: datetime.datetime | None = None,
-                    test_id: UUID | None = None):
+    def add_request(
+            self,
+            contents: RequestHTTP | RequestGRPC | RequestSQL | RequestNATS,
+            timestamp: datetime.datetime | None = None,
+            test_id: UUID | None = None
+    ):
         test_id = test_id or self.ctx.test_id
-        data = schemas.Request(
+        data = schemas.RequestCreate(
             test_run_id=self.ctx.test_run_id,
             test_id=test_id,
             timestamp=timestamp if timestamp else datetime.datetime.utcnow(),
-            request_type=contents.request_type,
             contents=contents
         )
         # Requests might be logged at setup phase while they do not belong to a certain test
         try:
-            self.http.post(f'{self.get_test_path(test_id)}/requests', data.json(exclude_unset=True))
+            self.http.post(f'{self.get_test_path(test_id)}/requests', data.model_dump_json())
         except RuntimeError:
-            self.http.post(f'{self.test_run_path}/requests', data.json(exclude_unset=True))
+            self.http.post(f'{self.test_run_path}/requests', data.model_dump_json())
+
+    def add_test_request(
+            self, contents: RequestHTTP | RequestGRPC | RequestSQL | RequestNATS,
+            timestamp: datetime.datetime | None = None,
+            test_id: UUID | None = None
+    ):
+        self.add_request(contents, timestamp, test_id)
 
     def add_metric_over_time(self, name: str, values: dict, test_id: UUID | None = None):
-        data = schemas.MetricOverTime(
+        data = schemas.MetricOverTimeCreate(
             test_run_id=self.ctx.test_run_id,
             test_id=test_id or self.ctx.test_id,
             name=name,
             values=values
         )
-        self.http.post(f'{self.test_run_path}/metrics-ot', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/metrics-ot', data.model_dump_json(exclude_unset=True))
 
     def add_progress(self, level: schemas.Level, message: str,
                      details: str | None = None, test_id: UUID | None = None):
         data = schemas.Progress(
+            id=uuid.uuid4(),
             test_run_id=self.ctx.test_run_id,
             test_id=test_id or self.ctx.test_id,
             level=level,
             message=message,
             details=details
         )
-        self.http.post(f'{self.test_run_path}/progress', data.json(exclude_unset=True))
+        self.http.post(f'{self.test_run_path}/progress', data.model_dump_json(exclude_unset=True))
+
+    def debug(self, message: str, details: str | None = None, test_id: UUID | None = None):
+        self.add_progress(self.Level.DEBUG, message, details, test_id)
 
     def info(self, message: str, details: str | None = None, test_id: UUID | None = None):
         self.add_progress(self.Level.INFO, message, details, test_id)
@@ -410,7 +425,7 @@ class Client:
     def error(self, message: str, details: str | None = None, test_id: UUID | None = None):
         self.add_progress(self.Level.ERROR, message, details, test_id)
 
-    def __add_attachment(self, base_url: str, attachment: str | BufferedReader,
+    def __add_attachment(self, base_url: str, attachment: str | IO,
                          name: str | None = None, mime_type: str | None = None):
         if isinstance(attachment, str):
             content = open(attachment, 'rb')
@@ -418,16 +433,16 @@ class Client:
             mime_type = mimetypes.guess_type(attachment)[0] if not mime_type else mime_type
         else:
             if not name or not mime_type:
-                raise RuntimeError('Name and MIME type have to be specified for file buffer')
+                raise RuntimeError('Name and MIME type have to be specified for a file buffer')
             content = attachment
 
         self.http.post_files(f'{base_url}/attachments', files={'attachment': (name, content, mime_type)})
 
-    def add_test_run_attachment(self, attachment: str | BufferedReader,
+    def add_test_run_attachment(self, attachment: str | IO,
                                 name: str | None = None, mime_type: str | None = None):
         self.__add_attachment(self.test_run_path, attachment, name, mime_type)
 
-    def add_test_attachment(self, attachment: str | BufferedReader, name: str | None = None,
+    def add_test_attachment(self, attachment: str | IO, name: str | None = None,
                             mime_type: str | None = None, test_id: UUID | None = None):
         self.__add_attachment(self.get_test_path(test_id), attachment, name, mime_type)
 

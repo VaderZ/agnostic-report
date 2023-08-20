@@ -20,7 +20,7 @@
             ></va-badge>
           </template>
           <template #cell(execution_time)="{ rowData }">
-            {{ Math.round((rowData.execution_time + Number.EPSILON) * 100) / 100 }}
+            {{ moment.utc(moment.duration(rowData.execution_time).asMilliseconds()).format('mm:ss') }}
           </template>
         </va-data-table>
       </div>
@@ -40,6 +40,7 @@
   import { getShortUpdateInterval, getTestColorByResult, HashUtil } from '../../../../utils'
   import { useRoute } from 'vue-router'
   import { useGlobalState } from '../../../../store'
+  import moment from 'moment'
 
   interface ColumnConfig {
     [prop: string]: string
@@ -96,7 +97,7 @@
           },
           {
             key: 'execution_time',
-            label: 'Execution Time (s)',
+            label: 'Execution Time',
             sortable: true,
             align: 'center',
             alignHead: 'center',

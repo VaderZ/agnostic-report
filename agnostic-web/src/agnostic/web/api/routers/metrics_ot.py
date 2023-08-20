@@ -8,7 +8,7 @@ router = APIRouter(tags=['Metrics Over Time'])
 
 
 @router.post('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot', status_code=status.HTTP_201_CREATED)
-async def create_test_run_metric(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID,
+async def create_test_run_metric(metric: schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID,
                                  response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
     metric.test_run_id = test_run_id
     try:
@@ -27,7 +27,7 @@ async def create_test_run_metric(metric: schemas.MetricOverTime, project_id: UUI
 
 
 @router.put('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot/{metric_id}')
-async def update_test_run_metric(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID, metric_id: UUID,
+async def update_test_run_metric(metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, metric_id: UUID,
                                  response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
     metric.id = metric_id
     metric.test_run_id = test_run_id
@@ -61,7 +61,7 @@ async def update_test_run_metric_fields(metric: schemas.MetricOverTime, project_
 
 @router.post('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot',
              status_code=status.HTTP_201_CREATED)
-async def create_test_metric(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID, test_id: UUID,
+async def create_test_metric(metric: schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, test_id: UUID,
                              response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
     metric.test_run_id = test_run_id
     metric.test_id = test_id
@@ -82,7 +82,7 @@ async def create_test_metric(metric: schemas.MetricOverTime, project_id: UUID, t
 
 
 @router.put('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}')
-async def update_test_metric(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id: UUID,
+async def update_test_metric(metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id: UUID,
                              response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
     metric.id = metric_id
     metric.test_run_id = test_run_id

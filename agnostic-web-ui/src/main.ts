@@ -15,7 +15,7 @@ import App from './App.vue'
 const app = createApp(App)
 
 const pinia = createPinia()
-axios.defaults.baseURL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : '/api/v1'
+axios.defaults.baseURL = '/api/v1'
 axios.defaults.paramsSerializer = (params) => Qs.stringify(params, { arrayFormat: 'repeat' })
 app.config.globalProperties.$axios = axios
 app.provide('axios', app.config.globalProperties.$axios)

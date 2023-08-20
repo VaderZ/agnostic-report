@@ -25,7 +25,7 @@ class Attachments:
         if not attachment:
             raise NotFoundError(f'Attachment {id} does not exist')
 
-        return schemas.Attachment.from_orm(attachment)
+        return schemas.Attachment.model_validate(attachment)
 
     async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.Attachment]:
         if not test_run_id and not test_id:
@@ -41,12 +41,12 @@ class Attachments:
 
         attachments = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Attachment.from_orm(attachment) for attachment in attachments]
+        return [schemas.Attachment.model_validate(attachment) for attachment in attachments]
 
     async def create(self, attachment: schemas.AttachmentCreate) -> UUID:
         attachment.id = attachment.id or uuid4()
         attachment.timestamp = attachment.timestamp or datetime.datetime.utcnow()
-        attachment = models.Attachment(**attachment.dict())
+        attachment = models.Attachment(**attachment.model_dump())
         self.session.add(attachment)
 
         try:
@@ -65,7 +65,7 @@ class Attachments:
                 await self.session.execute(
                     update(models.Attachment)
                     .where(models.Attachment.id == attachment.id)
-                    .values(**attachment.dict(exclude_unset=exclude_unset))
+                    .values(**attachment.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:

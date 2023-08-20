@@ -25,7 +25,7 @@ class MetricsOverTime:
         if not metric:
             raise NotFoundError(f'Metric {id} does not exist')
 
-        return schemas.MetricOverTime.from_orm(metric)
+        return schemas.MetricOverTime.model_validate(metric)
 
     async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.MetricOverTime]:
         if not test_run_id and not test_id:
@@ -41,12 +41,12 @@ class MetricsOverTime:
 
         metrics = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.MetricOverTime.from_orm(metric) for metric in metrics]
+        return [schemas.MetricOverTime.model_validate(metric) for metric in metrics]
 
-    async def create(self, metric: schemas.MetricOverTime) -> UUID:
+    async def create(self, metric: schemas.MetricOverTimeCreate) -> UUID:
         metric.id = metric.id or uuid4()
         metric.timestamp = metric.timestamp or datetime.datetime.utcnow()
-        metric = models.MetricOverTime(**metric.dict())
+        metric = models.MetricOverTime(**metric.model_dump())
         self.session.add(metric)
 
         try:
@@ -65,7 +65,7 @@ class MetricsOverTime:
                 await self.session.execute(
                     update(models.MetricOverTime)
                     .where(models.MetricOverTime.id == metric.id)
-                    .values(**metric.dict(exclude_unset=exclude_unset))
+                    .values(**metric.model_dump(exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:
