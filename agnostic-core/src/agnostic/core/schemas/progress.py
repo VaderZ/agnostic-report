@@ -18,4 +18,5 @@ class Progress(Base):
 class ProgressCreate(Progress):
     id: uuid.UUID | None = None
     message: str
+    level: Level
     

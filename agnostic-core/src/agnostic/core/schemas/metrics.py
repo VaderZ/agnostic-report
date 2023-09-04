@@ -13,8 +13,8 @@ class Metric(Base):
     test_run_id: uuid.UUID | None = None
     test_id: uuid.UUID | None = None
     timestamp: datetime.datetime | None = None
-    name: constr(strip_whitespace=True, max_length=256) | None = None
-    value: decimal.Decimal | None = None
+    name: constr(strip_whitespace=True, max_length=256)
+    value: decimal.Decimal
     description: str | None = None
 
 

@@ -265,6 +265,7 @@ def create_progress(tests: [Test]):
                     id=uuid.uuid4(),
                     test_run_id=t.test_run_id,
                     test_id=test_id,
+                    timestamp=datetime.datetime.utcnow(),
                     level=random.choice(('DEBUG', 'INFO', 'WARNING', 'ERROR')),
                     message=lorem.sentence(),
                     details=lorem.paragraph()
@@ -329,6 +330,7 @@ def create_test_metrics(tests: [Test]):
                     metrics.append(
                         Metric(
                             id=uuid.uuid4(),
+                            test_run_id=t.test_run_id,
                             test_id=t.id,
                             timestamp=t.start + datetime.timedelta(milliseconds=random.randint(1000, 5000)),
                             **m
