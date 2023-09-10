@@ -44,8 +44,6 @@ def upgrade():
     op.alter_column('logs', 'name',
                existing_type=sa.VARCHAR(length=256),
                nullable=False)
-    op.alter_column('logs', 'start',
-               existing_type=postgresql.TIMESTAMP())
     op.alter_column('logs', 'body',
                existing_type=sa.TEXT(),
                nullable=False)
@@ -258,8 +256,6 @@ def downgrade():
     op.alter_column('logs', 'body',
                existing_type=sa.TEXT(),
                nullable=True)
-    op.alter_column('logs', 'start',
-               existing_type=postgresql.TIMESTAMP())
     op.alter_column('logs', 'name',
                existing_type=sa.VARCHAR(length=256),
                nullable=True)

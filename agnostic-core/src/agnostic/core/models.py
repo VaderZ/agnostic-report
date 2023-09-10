@@ -40,9 +40,10 @@ class TestRun(Base):
     project_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('projects.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
-    start: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    start: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, index=True)
     finish: Mapped[datetime.datetime | None] = mapped_column(DateTime)
     heartbeat: Mapped[datetime.datetime | None] = mapped_column(DateTime)
     keep_forever: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text('false'))
@@ -60,7 +61,8 @@ class TestRunVariant(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     name: Mapped[str] = Column(String(128), nullable=False)
     value: Mapped[str] = Column(String(128), nullable=False)
@@ -78,7 +80,8 @@ class Test(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     start: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
     finish: Mapped[datetime.datetime | None] = mapped_column(DateTime)
@@ -96,7 +99,8 @@ class Log(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     name: Mapped[str] = mapped_column(String(256), nullable=False)
@@ -111,7 +115,8 @@ class Metric(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
@@ -126,7 +131,8 @@ class Request(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     request_type: Mapped[str] = mapped_column(String(128), nullable=False)
@@ -140,7 +146,8 @@ class Progress(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
@@ -155,7 +162,8 @@ class Attachment(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
@@ -171,7 +179,8 @@ class MetricOverTime(Base):
     test_run_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey('test_runs.id', ondelete='CASCADE'),
-        nullable=False
+        nullable=False,
+        index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     name: Mapped[str] = mapped_column(String(128), nullable=False)
