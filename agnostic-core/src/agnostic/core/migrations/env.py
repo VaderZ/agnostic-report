@@ -15,7 +15,8 @@ config = context.config
 
 config.set_main_option(
     'sqlalchemy.url',
-    f'{cfg.db_dialect}://{cfg.db_username}:{cfg.db_password}@{cfg.db_host}:{cfg.db_port}/{cfg.db_database}'
+    f'{cfg.options.db_dialect}://{cfg.options.db_username}:{cfg.options.db_password}@'
+    f'{cfg.options.db_host}:{cfg.options.db_port}/{cfg.options.db_database}'
 )
 
 # Interpret the config file for Python logging.
