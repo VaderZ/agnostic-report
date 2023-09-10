@@ -1,13 +1,23 @@
 import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-db_dialect: str = os.getenv('AGNOSTIC_DB_DIALECT', 'postgresql+asyncpg')
-db_username: str = os.getenv('AGNOSTIC_DB_USERNAME', 'postgres')
-db_password: str = os.getenv('AGNOSTIC_DB_PASSWORD', 'postgres')
-db_host: str = os.getenv('AGNOSTIC_DB_HOST', 'localhost')
-db_port: int = os.getenv('AGNOSTIC_DB_PORT', 5432)
-db_database: str = os.getenv('AGNOSTIC_DB_NAME', 'agnostic')
 
-web_host: str = os.getenv('AGNOSTIC_WEB_HOST', '0.0.0.0')
-web_port: int = os.getenv('AGNOSTIC_WEB_PORT', 8000)
+class Options(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix='agnostic_'
+    )
 
-production: bool = os.getenv('AGNOSTIC_PRODUCTION', True)
+    db_dialect: str | None = 'postgresql+asyncpg'
+    db_username: str | None = 'postgres'
+    db_password: str | None = 'postgres'
+    db_host: str | None = 'localhost'
+    db_port: int | None = 5432
+    db_database: str | None = 'agnostic'
+
+    web_host: str | None = '0.0.0.0'
+    web_port: int | None = 8000
+
+    production: bool | None = True
+
+
+options = Options()

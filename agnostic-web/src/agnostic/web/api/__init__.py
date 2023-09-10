@@ -43,7 +43,10 @@ app.mount('/', SPA(directory=base_dir / '..' / 'ui', html=True), name='ui')
 
 @app.on_event('startup')
 async def startup():
-    log.info(f'Connecting to the "{config.db_database}" database at {config.db_host}:{config.db_port}')
+    log.info(
+        f'Connecting to the "{config.options.db_database}" database '
+        f'at {config.options.db_host}:{config.options.db_port}'
+    )
     log.info('Migrating Agnostic database')
     await concurrency.run_in_threadpool(upgrade.run)
     log.info('Agnostic database migration finished')
