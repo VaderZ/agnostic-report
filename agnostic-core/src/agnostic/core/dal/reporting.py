@@ -1,6 +1,7 @@
 import datetime
 from uuid import UUID
 
+from sqlalchemy.dialects.postgresql import JSONPATH
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import aliased
@@ -17,7 +18,6 @@ import agnostic.core.schemas.reporting.test_runs
 import agnostic.core.schemas.reporting.tests
 import agnostic.core.schemas.reporting.widgets
 from agnostic.core import models, schemas
-
 
 NOT_SET = '<not set>'
 
@@ -409,7 +409,7 @@ class Reporting:
                     stat.c.failed,
                     func.round((cast(stat.c.failed, Float) / cast(stat.c.total, Float)) * 100).label('percent_failed')
                 ).order_by(
-                    cast(stat.c.failed, Float) / cast(stat.c.total, Float).desc(), stat.c.path, stat.c.name
+                    (cast(stat.c.failed, Float) / cast(stat.c.total, Float)).desc(), stat.c.path, stat.c.name
                 ).limit(
                     limit
                 )
@@ -499,7 +499,7 @@ class Reporting:
             result.data.append(
                 agnostic.core.schemas.reporting.metrics.MetricsData(
                     name=metric.title,
-                    value=table[metric.title]
+                    value=getattr(table, metric.title)
                 )
             )
 
@@ -919,8 +919,7 @@ class Reporting:
                                                   test_run_id: UUID,
                                                   result: list[str] | None,
                                                   search: list[str] | None,
-                                                  metrics: list[
-                                                               agnostic.core.schemas.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas.reporting.metrics.MetricsAggregate:
+                                                  metrics: list[agnostic.core.schemas.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas.reporting.metrics.MetricsAggregate:
         test_filters = and_(*get_test_filter(test_run_id, result, search))
 
         tests = select(
@@ -929,6 +928,7 @@ class Reporting:
             and_(*test_filters)
         )
 
+        # TODO: Reduce number of if's by merging query generation with results retrival
         metrics_sql = []
         properties_sql = []
         metrics_ot_sql = []
@@ -942,9 +942,11 @@ class Reporting:
                     ).label(metric.title)
                 )
             elif metric.table == 'properties':
-                path = '->'.join([f"'{node}'" for node in metric.path])
+                path = '.'.join(f'"{node}"' for node in metric.path)
                 properties_sql.append(
-                    text(f"test_runs.properties::jsonb->{path} as \"{metric.title}\"")
+                    func.jsonb_path_query_first(
+                        models.TestRun.properties, cast(f'$.{path}', JSONPATH)
+                    ).label(metric.title)
                 )
             elif metric.table == 'metrics_over_time':
                 aggregate = getattr(func, metric.func)(cast(models.MetricOverTime.values[metric.field], Float))
@@ -953,6 +955,7 @@ class Reporting:
                     aggregate = aggregate.filter(
                         and_(
                             col_filter,
+                            # TODO: Rethink this
                             text(f"cast(metrics_over_time.values::jsonb->'{metric.filter_field}' as float) "
                                  f"{metric.filter}"))
                     )
@@ -1001,7 +1004,7 @@ class Reporting:
             result.data.append(
                 agnostic.core.schemas.reporting.metrics.MetricsData(
                     name=metric.title,
-                    value=table[metric.title]
+                    value=getattr(table, metric.title)
                 )
             )
 
