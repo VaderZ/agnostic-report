@@ -8,8 +8,12 @@ router = APIRouter(tags=['Metrics Over Time'])
 
 
 @router.post('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot', status_code=status.HTTP_201_CREATED)
-async def create_test_run_metric(metric: schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID,
-                                 response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def create_test_run_metric_over_time(
+        metric: schemas.MetricOverTimeCreate,
+        project_id: UUID,
+        test_run_id: UUID,
+        response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.test_run_id = test_run_id
     try:
         metric_id = await metrics.create(metric)
@@ -27,8 +31,13 @@ async def create_test_run_metric(metric: schemas.MetricOverTimeCreate, project_i
 
 
 @router.put('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot/{metric_id}')
-async def update_test_run_metric(metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, metric_id: UUID,
-                                 response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def update_test_run_metric_over_time(
+        metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate,
+        project_id: UUID,
+        test_run_id: UUID,
+        metric_id: UUID,
+        response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.id = metric_id
     metric.test_run_id = test_run_id
     try:
@@ -46,8 +55,13 @@ async def update_test_run_metric(metric: schemas.MetricOverTime | schemas.Metric
 
 
 @router.patch('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot/{metric_id}')
-async def update_test_run_metric_fields(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID, metric_id: UUID,
-                                        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def update_test_run_metric_over_time_fields(
+        metric: schemas.MetricOverTime,
+        project_id: UUID,
+        test_run_id: UUID,
+        metric_id: UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.id = metric_id
     metric.test_run_id = test_run_id
     try:
@@ -61,14 +75,21 @@ async def update_test_run_metric_fields(metric: schemas.MetricOverTime, project_
 
 @router.post('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot',
              status_code=status.HTTP_201_CREATED)
-async def create_test_metric(metric: schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, test_id: UUID,
-                             response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def create_test_metric_over_time(
+        metric: schemas.MetricOverTimeCreate,
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.test_run_id = test_run_id
     metric.test_id = test_id
     try:
         metric_id = await metrics.create(metric)
-        response.headers.append('Location',
-                                f'/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}')
+        response.headers.append(
+            'Location',
+            f'/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}'
+        )
     except dal.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
@@ -82,8 +103,15 @@ async def create_test_metric(metric: schemas.MetricOverTimeCreate, project_id: U
 
 
 @router.put('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}')
-async def update_test_metric(metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate, project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id: UUID,
-                             response: Response, metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def update_test_metric_over_time(
+        metric: schemas.MetricOverTime | schemas.MetricOverTimeCreate,
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metric_id: UUID,
+        response: Response,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.id = metric_id
     metric.test_run_id = test_run_id
     metric.test_id = test_id
@@ -102,8 +130,14 @@ async def update_test_metric(metric: schemas.MetricOverTime | schemas.MetricOver
 
 
 @router.patch('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}')
-async def update_test_metric_fields(metric: schemas.MetricOverTime, project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id: UUID,
-                                    metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def update_test_metric_over_time_fields(
+        metric: schemas.MetricOverTime,
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metric_id: UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     metric.id = metric_id
     metric.test_run_id = test_run_id
     metric.test_id = test_id
@@ -117,8 +151,13 @@ async def update_test_metric_fields(metric: schemas.MetricOverTime, project_id: 
 
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot/{metric_id}', response_model=schemas.MetricOverTime)
-async def get_test_run_metric(project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id:UUID,
-                              metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def get_test_run_metric_over_time(
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metric_id:UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     try:
         return await metrics.get(metric_id)
     except dal.NotFoundError as e:
@@ -129,14 +168,23 @@ async def get_test_run_metric(project_id: UUID, test_run_id: UUID, test_id: UUID
 
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/metrics-ot', response_model=list[schemas.MetricOverTime])
-async def get_test_run_metrics(project_id: UUID, test_run_id: UUID, test_id: UUID,
-                               metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def get_test_run_metrics_over_time(
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     return await metrics.get_all(test_run_id)
 
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot/{metric_id}', response_model=schemas.MetricOverTime)
-async def get_test_metric(project_id: UUID, test_run_id: UUID, test_id: UUID, metric_id: UUID,
-                          metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def get_test_metric_over_time(
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metric_id: UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     try:
         return await metrics.get(metric_id)
     except dal.NotFoundError as e:
@@ -147,6 +195,10 @@ async def get_test_metric(project_id: UUID, test_run_id: UUID, test_id: UUID, me
 
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/metrics-ot', response_model=list[schemas.MetricOverTime])
-async def get_test_metrics(project_id: UUID, test_run_id: UUID, test_id: UUID,
-                           metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)):
+async def get_test_metrics_over_time(
+        project_id: UUID,
+        test_run_id: UUID,
+        test_id: UUID,
+        metrics: dal.MetricsOverTime = Depends(dal.get_metrics_ot)
+):
     return await metrics.get_all(test_id)

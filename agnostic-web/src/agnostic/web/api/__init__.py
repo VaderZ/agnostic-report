@@ -9,7 +9,7 @@ from agnostic.core import config
 from agnostic.core.migrations import upgrade
 from .routers import projects, test_runs, tests, logs, metrics, \
     progress, requests, metrics_ot, attachments, reporting, system
-from .utils import SPA
+from .utils import SPA, simplify_operation_ids
 
 base_dir = Path(__file__).parent
 
@@ -35,6 +35,8 @@ api.include_router(requests.router)
 api.include_router(attachments.router)
 api.include_router(reporting.router)
 api.include_router(system.router)
+
+simplify_operation_ids(api)
 
 app = FastAPI(title='Agnostic Report', version='1.0')
 app.mount('/api/v1', api)
