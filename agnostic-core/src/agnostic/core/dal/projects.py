@@ -26,7 +26,7 @@ class Projects:
 
         return schemas.Project.model_validate(project)
 
-    async def get_all(self) -> [schemas.Project]:
+    async def get_all(self) -> list[schemas.Project]:
         projects = (
             await self.session.execute(
                 select(models.Project)
@@ -34,15 +34,14 @@ class Projects:
         ).scalars().all()
         return [schemas.Project.model_validate(project) for project in projects]
 
-    async def create(self, project: schemas.ProjectCreate) -> UUID:
-        project.id = project.id or uuid4()
+    async def create(self, project: schemas.ProjectCreate | schemas.Project) -> UUID:
         project = models.Project(**project.model_dump())
         self.session.add(project)
 
         try:
             await self.session.commit()
         except IntegrityError:
-            raise DuplicateError(f'Project {project.id}, "{project.name}" already exists')
+            raise DuplicateError(f'Project "{project.name}" already exists')
 
         return project.id
 
@@ -55,7 +54,7 @@ class Projects:
             )
             await self.session.commit()
         except IntegrityError:
-            raise DuplicateError(f'Project {project.id}, "{project.name}" already exists')
+            raise DuplicateError(f'Project "{project.name}" already exists')
 
         if result.rowcount < 1:
             raise NotFoundError(f'Project {project.id} does not exist')

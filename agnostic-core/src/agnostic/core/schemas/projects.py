@@ -1,11 +1,11 @@
-__all__ = ['Project', 'ProjectUpdate', 'ProjectCreate']
+__all__ = ["Project", "ProjectUpdate", "ProjectCreate", "Projects"]
 import uuid
 
-from .base import Base
+from .base import Base, BaseRoot
+from pydantic import Field
 
 
 class ProjectUpdate(Base):
-    id: uuid.UUID | None = None
     name: str | None = None
     config: dict | None = None
 
@@ -16,3 +16,7 @@ class ProjectCreate(ProjectUpdate):
 
 class Project(ProjectCreate):
     id: uuid.UUID
+
+
+class Projects(BaseRoot):
+    root: list[Project]

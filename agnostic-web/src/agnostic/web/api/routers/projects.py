@@ -1,80 +1,115 @@
 from uuid import UUID
 
-from fastapi import Depends, APIRouter, HTTPException, Response, status
+from fastapi import Depends, APIRouter, HTTPException, Response, status, Request
 
 from agnostic.core import schemas, dal
 
-router = APIRouter(tags=['Projects'])
+router = APIRouter(tags=["Projects"], prefix="/projects")
 
 
-@router.post('/projects', status_code=status.HTTP_201_CREATED)
-async def create_project(project: schemas.ProjectCreate, response: Response,
-                         projects: dal.Projects = Depends(dal.get_projects)):
+@router.post(
+    "",
+    responses={
+        status.HTTP_201_CREATED: {
+            "headers": {"Location": {"description": "URL of created project", "type": "string"}}
+        },
+        status.HTTP_409_CONFLICT: {},
+    },
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_project(
+    project: schemas.ProjectCreate,
+    response: Response,
+    request: Request,
+    projects: dal.Projects = Depends(dal.get_projects),
+) -> None:
     try:
         project_id = await projects.create(project)
-        response.headers.append('Location', f'/projects/{project_id}')
+        response.headers.append("Location", f"{request.url.path}/{project_id}")
     except dal.DuplicateError as e:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            str(e)
-        )
+        raise HTTPException(status.HTTP_409_CONFLICT, str(e))
 
 
-@router.put('/projects/{project_id}')
-async def update_project(project: schemas.ProjectCreate, project_id: UUID,
-                         response: Response, projects: dal.Projects = Depends(dal.get_projects)):
-    project.id = project_id
+@router.put(
+    "/{project_id}",
+    responses={
+        status.HTTP_201_CREATED: {
+            "headers": {"Location": {"description": "URL of created project", "type": "string"}}
+        },
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_409_CONFLICT: {},
+    },
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def update_project(
+    project: schemas.ProjectUpdate,
+    project_id: UUID,
+    response: Response,
+    request: Request,
+    projects: dal.Projects = Depends(dal.get_projects),
+):
     try:
-        await projects.update(project)
-    except dal.DuplicateError as e:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            str(e)
+        await projects.update(
+            schemas.Project.model_construct(
+                _fields_set=project.model_fields_set, **project.model_dump(), id=project_id
+            )
         )
+        response.status_code = status.HTTP_204_NO_CONTENT
+    except dal.DuplicateError as e:
+        raise HTTPException(status.HTTP_409_CONFLICT, str(e))
     except dal.NotFoundError:
         try:
-            await projects.create(project)
+            await projects.create(schemas.Project(**project.model_dump(), id=project_id))
             response.status_code = status.HTTP_201_CREATED
-            response.headers.append('Location', f'/projects/{project.id}')
+            response.headers.append("Location", str(request.url.path))
         except dal.DuplicateError as e:
-            raise HTTPException(
-                status.HTTP_409_CONFLICT,
-                str(e)
-            )
+            raise HTTPException(status.HTTP_409_CONFLICT, str(e))
 
 
-@router.patch('/projects/{project_id}')
-async def update_project_fields(project: schemas.Project, project_id: UUID,
-                                projects: dal.Projects = Depends(dal.get_projects)):
-    print(project)
-    project.id = project_id
+@router.patch(
+    "/{project_id}",
+    responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_404_NOT_FOUND: {},
+        status.HTTP_409_CONFLICT: {},
+    },
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def update_project_fields(
+    project: schemas.ProjectUpdate,
+    project_id: UUID,
+    projects: dal.Projects = Depends(dal.get_projects),
+):
     try:
-        _project = await projects.update(project, exclude_unset=True)
+        await projects.update(
+            schemas.Project.model_construct(
+                _fields_set=project.model_fields_set, **project.model_dump(), id=project_id
+            ),
+            exclude_unset=True,
+        )
     except dal.DuplicateError as e:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            str(e)
-        )
+        raise HTTPException(status.HTTP_409_CONFLICT, str(e))
     except dal.NotFoundError as e:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            str(e)
-        )
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(e))
 
 
-@router.get('/projects/{project_id}', response_model=schemas.Project)
-async def get_project(project_id: UUID, projects: dal.Projects = Depends(dal.get_projects)):
+@router.get(
+    "/{project_id}",
+    responses={
+        status.HTTP_404_NOT_FOUND: {},
+    },
+)
+async def get_project(
+    project_id: UUID, projects: dal.Projects = Depends(dal.get_projects)
+) -> schemas.Project:
     try:
         project = await projects.get(project_id)
     except dal.NotFoundError as e:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            str(e)
-        )
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(e))
 
     return project
 
 
-@router.get('/projects', response_model=list[schemas.Project])
-async def get_projects(projects: dal.Projects = Depends(dal.get_projects)):
-    return await projects.get_all()
+@router.get("")
+async def get_projects(projects: dal.Projects = Depends(dal.get_projects)) -> schemas.Projects:
+    return schemas.Projects(await projects.get_all())
