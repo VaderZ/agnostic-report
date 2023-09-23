@@ -11,7 +11,7 @@ router = APIRouter(tags=["Projects"], prefix="/projects")
     "",
     responses={
         status.HTTP_201_CREATED: {
-            "headers": {"Location": {"description": "URL of created project", "type": "string"}}
+            "headers": {"Location": {"description": "URL of the created project", "type": "string"}}
         },
         status.HTTP_409_CONFLICT: {},
     },
@@ -34,7 +34,7 @@ async def create_project(
     "/{project_id}",
     responses={
         status.HTTP_201_CREATED: {
-            "headers": {"Location": {"description": "URL of created project", "type": "string"}}
+            "headers": {"Location": {"description": "URL of the created project", "type": "string"}}
         },
         status.HTTP_204_NO_CONTENT: {},
         status.HTTP_409_CONFLICT: {},

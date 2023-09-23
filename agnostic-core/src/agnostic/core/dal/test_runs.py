@@ -1,6 +1,6 @@
 import copy
 import datetime
-from uuid import UUID, uuid4
+import uuid
 
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
@@ -16,7 +16,7 @@ class TestRuns:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def __update_variant(self, id: UUID, variant: dict):
+    async def __update_variant(self, id: uuid.UUID, variant: dict):
         variants = (await self.session.execute(
             select(models.TestRunVariant)
             .where(models.TestRunVariant.test_run_id == id)
@@ -38,7 +38,7 @@ class TestRuns:
                 del _variant[var.name]
 
         for key, val in _variant.items():
-            values.append({'id': uuid4(), 'test_run_id': id,
+            values.append({'id': uuid.uuid4(), 'test_run_id': id,
                            'name': key, 'value': val})
 
         statement = insert(models.TestRunVariant).values(values)
@@ -49,11 +49,11 @@ class TestRuns:
 
         await self.session.execute(statement)
 
-    async def __get_variant(self, id: UUID | list[UUID]) -> dict[UUID, dict]:
+    async def __get_variant(self, id: uuid.UUID | list[uuid.UUID]) -> dict[uuid.UUID, dict]:
         # TODO: Find a way to do that in SQL
         #  as this approach is ineffective
         ids = id
-        if isinstance(ids, UUID):
+        if isinstance(ids, uuid.UUID):
             ids = [id]
         variants = (await self.session.execute(
             select(models.TestRunVariant)
@@ -68,7 +68,7 @@ class TestRuns:
 
         return result
 
-    async def get(self, id: UUID) -> schemas.TestRun:
+    async def get(self, id: uuid.UUID) -> schemas.TestRun:
         test_run = (
             await self.session.execute(
                 select(models.TestRun)
@@ -86,7 +86,7 @@ class TestRuns:
             test_run.variant = {}
         return test_run
 
-    async def get_all(self, project_id: UUID) -> [schemas.TestRun]:
+    async def get_all(self, project_id: uuid.UUID) -> list[schemas.TestRun]:
         test_runs = (
             await self.session.execute(
                 select(models.TestRun)
@@ -101,15 +101,15 @@ class TestRuns:
 
         return result
 
-    async def create(self, test_run: schemas.TestRun) -> UUID:
-        test_run.id = test_run.id or uuid4()
+    async def create(self, test_run: schemas.TestRun) -> uuid.UUID:
+        test_run.id = test_run.id or uuid.uuid4()
         test_run.start = test_run.start or datetime.datetime.utcnow()
         test_run.heartbeat = test_run.heartbeat or datetime.datetime.utcnow()
         variant = test_run.variant
         test_run = models.TestRun(**test_run.model_dump(exclude={'variant'}))
         self.session.add(test_run)
 
-        if variant is not None:
+        if variant:
             await self.__update_variant(test_run.id, variant)
 
         try:
@@ -122,22 +122,22 @@ class TestRuns:
 
         return test_run.id
 
-    async def update(self, test_run: schemas.TestRun, exclude_unset: bool = False) -> UUID:
+    async def update(self, test_run: schemas.TestRun, exclude_unset: bool = False) -> uuid.UUID:
         try:
             result = (
                 await self.session.execute(
                     update(models.TestRun)
                     .where(models.TestRun.id == test_run.id)
-                    .values(**test_run.model_dump(exclude={'variant'}, exclude_unset=exclude_unset))
+                    .values(**test_run.model_dump(exclude={'variant', 'id'}, exclude_unset=exclude_unset))
                 )
             )
         except IntegrityError:
-            raise NotFoundError(f'Project {test_run.id} does not exist')
+            raise NotFoundError(f'Project {test_run.project_id} does not exist')
 
         if result.rowcount < 1:
             raise NotFoundError(f'Test Run {test_run.id} does not exist')
 
-        if test_run.variant is not None:
+        if test_run.variant:
             await self.__update_variant(test_run.id, test_run.variant)
 
         await self.session.commit()

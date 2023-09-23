@@ -1,23 +1,17 @@
-__all__ = ['Base', 'BaseRoot', 'Timestamp', 'KeyValue', 'StringValue', 'Paginator']
+__all__ = ["Base", "BaseRoot", "Timestamp", "KeyValue", "StringValue", "Paginator"]
 
 import datetime
 import typing
 
-from pydantic import BaseModel, ConfigDict,  RootModel
+from pydantic import BaseModel, ConfigDict, RootModel
 
 
 class Base(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        validate_assignment=True
-    )
+    model_config = ConfigDict(from_attributes=True, validate_assignment=True)
 
 
 class BaseRoot(RootModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        validate_assignment=True
-    )
+    model_config = ConfigDict(from_attributes=True, validate_assignment=True)
 
     def __iter__(self):
         return iter(self.root)
@@ -27,7 +21,7 @@ class BaseRoot(RootModel):
 
 
 class Timestamp(BaseModel):
-    timestamp: datetime.datetime | None
+    timestamp: datetime.datetime | None = None
 
 
 class KeyValue(BaseModel):
