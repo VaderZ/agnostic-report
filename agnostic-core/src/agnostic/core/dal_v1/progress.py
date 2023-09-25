@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 
-from agnostic.core import models, schemas
+from agnostic.core import models, schemas_v1
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError, InvalidArgumentsError
 
 
@@ -14,7 +14,7 @@ class Progress:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas.Progress:
+    async def get(self, id: UUID) -> schemas_v1.Progress:
         progress = (
             await self.session.execute(
                 select(models.Progress)
@@ -25,9 +25,9 @@ class Progress:
         if not progress:
             raise NotFoundError(f'Progress record {id} does not exist')
 
-        return schemas.Progress.model_validate(progress)
+        return schemas_v1.Progress.model_validate(progress)
 
-    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.Progress]:
+    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas_v1.Progress]:
         if not test_run_id and not test_id:
             raise InvalidArgumentsError('Test Run and/or Test id have to be provided')
 
@@ -41,9 +41,9 @@ class Progress:
 
         progresses = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Progress.model_validate(progress) for progress in progresses]
+        return [schemas_v1.Progress.model_validate(progress) for progress in progresses]
 
-    async def create(self, progress: schemas.ProgressCreate) -> UUID:
+    async def create(self, progress: schemas_v1.ProgressCreate) -> UUID:
         progress.id = progress.id or uuid4()
         progress.timestamp = progress.timestamp or datetime.datetime.utcnow()
         progress = models.Progress(**progress.model_dump())
@@ -59,7 +59,7 @@ class Progress:
 
         return progress.id
 
-    async def update(self, progress: schemas.Progress, exclude_unset: bool = False) -> UUID:
+    async def update(self, progress: schemas_v1.Progress, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

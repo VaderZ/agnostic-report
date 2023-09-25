@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 
-from agnostic.core import models, schemas
+from agnostic.core import models, schemas_v1
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError
 
 
@@ -15,7 +15,7 @@ class Requests:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas.Request:
+    async def get(self, id: UUID) -> schemas_v1.Request:
         metric = (
             await self.session.execute(
                 select(models.Request)
@@ -26,17 +26,17 @@ class Requests:
         if not metric:
             raise NotFoundError(f'Request {id} does not exist')
 
-        return schemas.Request.model_validate(metric)
+        return schemas_v1.Request.model_validate(metric)
 
-    async def get_all(self, test_id: UUID) -> List[schemas.Request]:
+    async def get_all(self, test_id: UUID) -> List[schemas_v1.Request]:
         requests = (await self.session.execute(
             select(models.Request)
             .where(models.Request.test_id == test_id)
         ))
 
-        return [schemas.Request.model_validate(request) for request in requests]
+        return [schemas_v1.Request.model_validate(request) for request in requests]
 
-    async def create(self, request: schemas.RequestCreate) -> UUID:
+    async def create(self, request: schemas_v1.RequestCreate) -> UUID:
         request.id = request.id or uuid4()
         request.timestamp = request.timestamp or datetime.datetime.utcnow()
         request = models.Request(**request.model_dump(), request_type=request.contents.request_type)
@@ -52,7 +52,7 @@ class Requests:
 
         return request.id
 
-    async def update(self, request: schemas.Request, exclude_unset: bool = False) -> UUID:
+    async def update(self, request: schemas_v1.Request, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

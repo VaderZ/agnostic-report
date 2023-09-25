@@ -2,18 +2,18 @@ from uuid import UUID
 
 from fastapi import Depends, APIRouter, HTTPException, Response, status
 
-from agnostic.core import schemas, dal
+from agnostic.core import schemas_v1, dal_v1
 
 router = APIRouter(tags=['Projects'])
 
 
 @router.post('/projects', status_code=status.HTTP_201_CREATED)
-async def create_project(project: schemas.ProjectCreate, response: Response,
-                         projects: dal.Projects = Depends(dal.get_projects)):
+async def create_project(project: schemas_v1.ProjectCreate, response: Response,
+                         projects: dal_v1.Projects = Depends(dal_v1.get_projects)):
     try:
         project_id = await projects.create(project)
         response.headers.append('Location', f'/projects/{project_id}')
-    except dal.DuplicateError as e:
+    except dal_v1.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             str(e)
@@ -21,22 +21,22 @@ async def create_project(project: schemas.ProjectCreate, response: Response,
 
 
 @router.put('/projects/{project_id}')
-async def update_project(project: schemas.ProjectCreate, project_id: UUID,
-                         response: Response, projects: dal.Projects = Depends(dal.get_projects)):
+async def update_project(project: schemas_v1.ProjectCreate, project_id: UUID,
+                         response: Response, projects: dal_v1.Projects = Depends(dal_v1.get_projects)):
     project.id = project_id
     try:
         await projects.update(project)
-    except dal.DuplicateError as e:
+    except dal_v1.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             str(e)
         )
-    except dal.NotFoundError:
+    except dal_v1.NotFoundError:
         try:
             await projects.create(project)
             response.status_code = status.HTTP_201_CREATED
             response.headers.append('Location', f'/projects/{project.id}')
-        except dal.DuplicateError as e:
+        except dal_v1.DuplicateError as e:
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
                 str(e)
@@ -44,29 +44,29 @@ async def update_project(project: schemas.ProjectCreate, project_id: UUID,
 
 
 @router.patch('/projects/{project_id}')
-async def update_project_fields(project: schemas.Project, project_id: UUID,
-                                projects: dal.Projects = Depends(dal.get_projects)):
+async def update_project_fields(project: schemas_v1.Project, project_id: UUID,
+                                projects: dal_v1.Projects = Depends(dal_v1.get_projects)):
     print(project)
     project.id = project_id
     try:
         _project = await projects.update(project, exclude_unset=True)
-    except dal.DuplicateError as e:
+    except dal_v1.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             str(e)
         )
-    except dal.NotFoundError as e:
+    except dal_v1.NotFoundError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
         )
 
 
-@router.get('/projects/{project_id}', response_model=schemas.Project)
-async def get_project(project_id: UUID, projects: dal.Projects = Depends(dal.get_projects)):
+@router.get('/projects/{project_id}', response_model=schemas_v1.Project)
+async def get_project(project_id: UUID, projects: dal_v1.Projects = Depends(dal_v1.get_projects)):
     try:
         project = await projects.get(project_id)
-    except dal.NotFoundError as e:
+    except dal_v1.NotFoundError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
@@ -75,6 +75,6 @@ async def get_project(project_id: UUID, projects: dal.Projects = Depends(dal.get
     return project
 
 
-@router.get('/projects', response_model=list[schemas.Project])
-async def get_projects(projects: dal.Projects = Depends(dal.get_projects)):
+@router.get('/projects', response_model=list[schemas_v1.Project])
+async def get_projects(projects: dal_v1.Projects = Depends(dal_v1.get_projects)):
     return await projects.get_all()

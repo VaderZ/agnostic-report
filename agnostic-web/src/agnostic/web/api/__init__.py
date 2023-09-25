@@ -7,7 +7,7 @@ from starlette import concurrency
 
 from agnostic.core import config
 from agnostic.core.migrations import upgrade
-from .routers import projects, test_runs, tests, logs, metrics, \
+from .routers_v1 import projects, test_runs, tests, logs, metrics, \
     progress, requests, metrics_ot, attachments, reporting, system
 from .utils import SPA, simplify_operation_ids
 
@@ -23,23 +23,23 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-api = FastAPI(ptitle='Agnostic Report', default_response_class=ORJSONResponse)
-api.include_router(projects.router)
-api.include_router(test_runs.router)
-api.include_router(tests.router)
-api.include_router(logs.router)
-api.include_router(metrics.router)
-api.include_router(metrics_ot.router)
-api.include_router(progress.router)
-api.include_router(requests.router)
-api.include_router(attachments.router)
-api.include_router(reporting.router)
-api.include_router(system.router)
+api_v1 = FastAPI(ptitle='Agnostic Report', default_response_class=ORJSONResponse)
+api_v1.include_router(projects.router)
+api_v1.include_router(test_runs.router)
+api_v1.include_router(tests.router)
+api_v1.include_router(logs.router)
+api_v1.include_router(metrics.router)
+api_v1.include_router(metrics_ot.router)
+api_v1.include_router(progress.router)
+api_v1.include_router(requests.router)
+api_v1.include_router(attachments.router)
+api_v1.include_router(reporting.router)
+api_v1.include_router(system.router)
 
-simplify_operation_ids(api)
+simplify_operation_ids(api_v1)
 
 app = FastAPI(title='Agnostic Report', version='1.0')
-app.mount('/api/v1', api)
+app.mount('/api/v1', api_v1)
 app.mount('/', SPA(directory=base_dir / '..' / 'ui', html=True), name='ui')
 
 

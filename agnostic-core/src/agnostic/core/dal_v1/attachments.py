@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 
-from agnostic.core import models, schemas
+from agnostic.core import models, schemas_v1
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError, InvalidArgumentsError
 
 
@@ -14,7 +14,7 @@ class Attachments:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas.Attachment:
+    async def get(self, id: UUID) -> schemas_v1.Attachment:
         attachment = (
             await self.session.execute(
                 select(models.Attachment)
@@ -25,9 +25,9 @@ class Attachments:
         if not attachment:
             raise NotFoundError(f'Attachment {id} does not exist')
 
-        return schemas.Attachment.model_validate(attachment)
+        return schemas_v1.Attachment.model_validate(attachment)
 
-    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.Attachment]:
+    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas_v1.Attachment]:
         if not test_run_id and not test_id:
             raise InvalidArgumentsError('Test Run and/or Test id have to be provided')
 
@@ -41,9 +41,9 @@ class Attachments:
 
         attachments = (await self.session.execute(query)).scalars().all()
 
-        return [schemas.Attachment.model_validate(attachment) for attachment in attachments]
+        return [schemas_v1.Attachment.model_validate(attachment) for attachment in attachments]
 
-    async def create(self, attachment: schemas.AttachmentCreate) -> UUID:
+    async def create(self, attachment: schemas_v1.AttachmentCreate) -> UUID:
         attachment.id = attachment.id or uuid4()
         attachment.timestamp = attachment.timestamp or datetime.datetime.utcnow()
         attachment = models.Attachment(**attachment.model_dump())
@@ -59,7 +59,7 @@ class Attachments:
 
         return attachment.id
 
-    async def update(self, attachment: schemas.Attachment, exclude_unset: bool = False) -> UUID:
+    async def update(self, attachment: schemas_v1.Attachment, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

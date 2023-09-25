@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 
-from agnostic.core import models, schemas
+from agnostic.core import models, schemas_v1
 from .exceptions import DuplicateError, NotFoundError
 
 
@@ -13,7 +13,7 @@ class Projects:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas.Project | None:
+    async def get(self, id: UUID) -> schemas_v1.Project | None:
         project = (
             await self.session.execute(
                 select(models.Project)
@@ -24,17 +24,17 @@ class Projects:
         if not project:
             raise NotFoundError(f'Project {id} does not exist')
 
-        return schemas.Project.model_validate(project)
+        return schemas_v1.Project.model_validate(project)
 
-    async def get_all(self) -> [schemas.Project]:
+    async def get_all(self) -> [schemas_v1.Project]:
         projects = (
             await self.session.execute(
                 select(models.Project)
             )
         ).scalars().all()
-        return [schemas.Project.model_validate(project) for project in projects]
+        return [schemas_v1.Project.model_validate(project) for project in projects]
 
-    async def create(self, project: schemas.ProjectCreate) -> UUID:
+    async def create(self, project: schemas_v1.ProjectCreate) -> UUID:
         project.id = project.id or uuid4()
         project = models.Project(**project.model_dump())
         self.session.add(project)
@@ -46,7 +46,7 @@ class Projects:
 
         return project.id
 
-    async def update(self, project: schemas.Project, exclude_unset: bool = False) -> UUID:
+    async def update(self, project: schemas_v1.Project, exclude_unset: bool = False) -> UUID:
         try:
             result = await self.session.execute(
                 update(models.Project)

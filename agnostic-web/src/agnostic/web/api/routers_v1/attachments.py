@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import Depends, APIRouter, HTTPException, Response, status, UploadFile, File
 from fastapi.responses import StreamingResponse
 
-from agnostic.core import schemas, dal
+from agnostic.core import schemas_v1, dal_v1
 
 router = APIRouter(tags=['Attachments'])
 
@@ -13,9 +13,9 @@ router = APIRouter(tags=['Attachments'])
 @router.post('/projects/{project_id}/test-runs/{test_run_id}/attachments', status_code=status.HTTP_201_CREATED)
 async def create_test_run_attachment(project_id: UUID, test_run_id: UUID, response: Response,
                                      attachment: UploadFile = File(...),
-                                     attachments: dal.Attachments = Depends(dal.get_attachments)):
+                                     attachments: dal_v1.Attachments = Depends(dal_v1.get_attachments)):
     content = await attachment.read()
-    record = schemas.AttachmentCreate(
+    record = schemas_v1.AttachmentCreate(
         test_run_id=test_run_id,
         timestamp=datetime.datetime.utcnow(),
         name=attachment.filename,
@@ -29,12 +29,12 @@ async def create_test_run_attachment(project_id: UUID, test_run_id: UUID, respon
             'Location',
             f'/projects/{project_id}/test-runs/{test_run_id}/attachments/{attachment_id}'
         )
-    except dal.DuplicateError as e:
+    except dal_v1.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             str(e)
         )
-    except dal.ForeignKeyError as e:
+    except dal_v1.ForeignKeyError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
@@ -45,9 +45,9 @@ async def create_test_run_attachment(project_id: UUID, test_run_id: UUID, respon
              status_code=status.HTTP_201_CREATED)
 async def create_test_attachment(project_id: UUID, test_run_id: UUID, test_id: UUID,
                                  response: Response, attachment: UploadFile = File(...),
-                                 attachments: dal.Attachments = Depends(dal.get_attachments)):
+                                 attachments: dal_v1.Attachments = Depends(dal_v1.get_attachments)):
     content = await attachment.read()
-    record = schemas.AttachmentCreate(
+    record = schemas_v1.AttachmentCreate(
         test_run_id=test_run_id,
         test_id=test_id,
         timestamp=datetime.datetime.utcnow(),
@@ -62,12 +62,12 @@ async def create_test_attachment(project_id: UUID, test_run_id: UUID, test_id: U
             'Location',
             f'/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/attachments/{attachment_id}'
         )
-    except dal.DuplicateError as e:
+    except dal_v1.DuplicateError as e:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
             str(e)
         )
-    except dal.ForeignKeyError as e:
+    except dal_v1.ForeignKeyError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
@@ -81,7 +81,7 @@ def stream_response(content):
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/attachments/{attachment_id}')
 async def get_test_run_attachment(project_id: UUID, test_run_id: UUID, attachment_id: UUID,
-                                  attachments: dal.Attachments = Depends(dal.get_attachments)):
+                                  attachments: dal_v1.Attachments = Depends(dal_v1.get_attachments)):
     try:
         attachment = await attachments.get(attachment_id)
         return StreamingResponse(
@@ -92,7 +92,7 @@ async def get_test_run_attachment(project_id: UUID, test_run_id: UUID, attachmen
                 'Content-Length': f'{attachment.size}'
             }
         )
-    except dal.NotFoundError as e:
+    except dal_v1.NotFoundError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
@@ -101,7 +101,7 @@ async def get_test_run_attachment(project_id: UUID, test_run_id: UUID, attachmen
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/tests/{test_id}/attachments/{attachment_id}')
 async def get_test_attachment(project_id: UUID, test_run_id: UUID, test_id: UUID, attachment_id: UUID,
-                              attachments: dal.Attachments = Depends(dal.get_attachments)):
+                              attachments: dal_v1.Attachments = Depends(dal_v1.get_attachments)):
     try:
         attachment = await attachments.get(attachment_id)
         return StreamingResponse(
@@ -112,7 +112,7 @@ async def get_test_attachment(project_id: UUID, test_run_id: UUID, test_id: UUID
                 'Content-Length': f'{attachment.size}'
             }
         )
-    except dal.NotFoundError as e:
+    except dal_v1.NotFoundError as e:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             str(e)
