@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update, delete
 
-from agnostic.core import models, schemas_v1
+from agnostic.core import models, schemas
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError
 
 
@@ -68,7 +68,7 @@ class TestRuns:
 
         return result
 
-    async def get(self, id: UUID) -> schemas_v1.TestRun:
+    async def get(self, id: UUID) -> schemas.v1.TestRun:
         test_run = (
             await self.session.execute(
                 select(models.TestRun)
@@ -79,14 +79,14 @@ class TestRuns:
         if not test_run:
             raise NotFoundError(f'Test Run {id} does not exist')
 
-        test_run = schemas_v1.TestRun.model_validate(test_run)
+        test_run = schemas.v1.TestRun.model_validate(test_run)
         try:
             test_run.variant = (await self.__get_variant(id))[id]
         except KeyError:
             test_run.variant = {}
         return test_run
 
-    async def get_all(self, project_id: UUID) -> [schemas_v1.TestRun]:
+    async def get_all(self, project_id: UUID) -> [schemas.v1.TestRun]:
         test_runs = (
             await self.session.execute(
                 select(models.TestRun)
@@ -101,7 +101,7 @@ class TestRuns:
 
         return result
 
-    async def create(self, test_run: schemas_v1.TestRun) -> UUID:
+    async def create(self, test_run: schemas.v1.TestRun) -> UUID:
         test_run.id = test_run.id or uuid4()
         test_run.start = test_run.start or datetime.datetime.utcnow()
         test_run.heartbeat = test_run.heartbeat or datetime.datetime.utcnow()
@@ -122,7 +122,7 @@ class TestRuns:
 
         return test_run.id
 
-    async def update(self, test_run: schemas_v1.TestRun, exclude_unset: bool = False) -> UUID:
+    async def update(self, test_run: schemas.v1.TestRun, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

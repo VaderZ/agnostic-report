@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 from sqlalchemy.sql.functions import concat
 
-from agnostic.core import models, schemas_v1
+from agnostic.core import models, schemas
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError, InvalidArgumentsError
 
 
@@ -16,7 +16,7 @@ class Logs:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas_v1.Log:
+    async def get(self, id: UUID) -> schemas.v1.Log:
         log = (
             await self.session.execute(
                 select(models.Log)
@@ -27,7 +27,7 @@ class Logs:
         if not log:
             raise NotFoundError(f'Log {id} does not exist')
 
-        return schemas_v1.Log.model_validate(log)
+        return schemas.v1.Log.model_validate(log)
 
     async def get_body(self, id: UUID, offset: int | None = None, limit: int | None = None) -> str:
         args = [offset or 0]
@@ -48,7 +48,7 @@ class Logs:
 
         return body
 
-    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas_v1.Log]:
+    async def get_all(self, test_run_id: UUID | None = None, test_id: UUID | None = None) -> [schemas.v1.Log]:
         if not test_run_id and not test_id:
             raise InvalidArgumentsError('Test Run and/or Test id have to be provided')
 
@@ -62,9 +62,9 @@ class Logs:
 
         logs = (await self.session.execute(query)).scalars().all()
 
-        return [schemas_v1.Log.model_validate(log) for log in logs]
+        return [schemas.v1.Log.model_validate(log) for log in logs]
 
-    async def create(self, log: schemas_v1.LogCreate) -> UUID:
+    async def create(self, log: schemas.v1.LogCreate) -> UUID:
         log.id = log.id or uuid4()
         log.start = log.start or datetime.datetime.utcnow()
         log = models.Log(**log.model_dump())
@@ -80,7 +80,7 @@ class Logs:
 
         return log.id
 
-    async def update(self, log: schemas_v1.Log, exclude_unset: bool = False) -> UUID:
+    async def update(self, log: schemas.v1.Log, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

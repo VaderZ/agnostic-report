@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql.expression import update
 
-from agnostic.core import models, schemas_v1
+from agnostic.core import models, schemas
 from .exceptions import DuplicateError, ForeignKeyError, NotFoundError
 
 
@@ -14,7 +14,7 @@ class Tests:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get(self, id: UUID) -> schemas_v1.Test:
+    async def get(self, id: UUID) -> schemas.v1.Test:
         test = (
             await self.session.execute(
                 select(models.Test)
@@ -25,18 +25,18 @@ class Tests:
         if not test:
             raise NotFoundError(f'Test {id} does not exist')
 
-        return schemas_v1.Test.model_validate(test)
+        return schemas.v1.Test.model_validate(test)
 
-    async def get_all(self, test_run_id: UUID) -> [schemas_v1.TestRun]:
+    async def get_all(self, test_run_id: UUID) -> [schemas.v1.TestRun]:
         tests = (
             await self.session.execute(
                 select(models.Test)
                 .where(models.Test.test_run_id == test_run_id)
             )).scalars().all()
 
-        return [schemas_v1.Test.model_validate(test) for test in tests]
+        return [schemas.v1.Test.model_validate(test) for test in tests]
 
-    async def create(self, test: schemas_v1.Test) -> UUID:
+    async def create(self, test: schemas.v1.Test) -> UUID:
         test.id = test.id or uuid4()
         test.start = test.start or datetime.datetime.utcnow()
         test = models.Test(**test.model_dump())
@@ -52,7 +52,7 @@ class Tests:
 
         return test.id
 
-    async def update(self, test: schemas_v1.Test, exclude_unset: bool = False) -> UUID:
+    async def update(self, test: schemas.v1.Test, exclude_unset: bool = False) -> UUID:
         try:
             result = (
                 await self.session.execute(

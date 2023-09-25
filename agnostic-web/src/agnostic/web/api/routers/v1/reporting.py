@@ -2,15 +2,15 @@ from uuid import UUID
 
 from fastapi import Depends, APIRouter, Query
 
-from agnostic.core import dal_v1
-from agnostic.core.schemas_v1 import reporting as rs
+from agnostic.core import dal
+from agnostic.core.schemas.v1 import reporting as rs
 
 router = APIRouter(prefix="/reporting", tags=["Reporting"])
 
 
 @router.get("/projects", response_model=rs.PagedProjects)
 async def get_projects_report(
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     order_by: str = Query("name", regex="^(name|test_runs_count|latest_test_run)$"),
     order: str = Query("asc", regex="^asc|desc$"),
     page: int = Query(1, ge=1),
@@ -22,7 +22,7 @@ async def get_projects_report(
 @router.get("/projects/{project_id}/test-runs", response_model=rs.PagedTestRuns)
 async def get_project_test_runs_report(
     project_id: UUID,
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     order_by: str = Query(
         "start",
         regex="^(start|finish|sut_branch|sut_version|test_branch|test_version)$",
@@ -53,7 +53,7 @@ async def get_project_test_runs_report(
 @router.get("/projects/{project_id}/tests-over-time", response_model=rs.TestsOverTime)
 async def get_project_tests_over_time_report(
     project_id: UUID,
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     sut_branch: list[str] | None = Query(None),
     test_branch: list[str] | None = Query(None),
     variant: list[str] | None = Query(None),
@@ -67,7 +67,7 @@ async def get_project_tests_over_time_report(
 @router.get("/projects/{project_id}/test-run-filters", response_model=rs.TestRunFilters)
 async def get_project_test_run_reporting_filters(
     project_id: UUID,
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     interval: str | None = Query(None),
 ):
     return await reporting.get_test_run_filters(project_id, interval)
@@ -76,7 +76,7 @@ async def get_project_test_run_reporting_filters(
 @router.get("/projects/{project_id}/top-failed-tests", response_model=rs.TopFailedTests)
 async def get_project_top_failed_tests_report(
     project_id: UUID,
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     sut_branch: list[str] | None = Query(None),
     test_branch: list[str] | None = Query(None),
     variant: list[str] | None = Query(None),
@@ -92,7 +92,7 @@ async def get_project_top_failed_tests_report(
 async def get_project_metrics_report(
     project_id: UUID,
     metrics: list[rs.MetricRequest],
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
     sut_branch: list[str] | None = Query(None),
     test_branch: list[str] | None = Query(None),
     variant: list[str] | None = Query(None),
@@ -112,7 +112,7 @@ async def get_test_run_tests_by_result(
     test_run_id: UUID,
     result: list[str] | None = Query(None),
     search: list[str] | None = Query(None),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_tests_by_result(project_id, test_run_id, result, search)
 
@@ -127,7 +127,7 @@ async def get_test_run_tests_report(
     order: str = Query("asc", regex="^asc|desc$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_tests(
         project_id, test_run_id, result, search, order, order_by, page, page_size
@@ -145,7 +145,7 @@ async def get_test_run_metrics_list_report(
     order: str = Query("asc", regex="^asc|desc$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_run_metrics_list(
         project_id, test_run_id, order, order_by, page, page_size
@@ -165,7 +165,7 @@ async def get_test_run_progress(
     order: str = Query("desc", regex="^asc|desc$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_run_progress(
         project_id, test_run_id, result, search, order, order_by, page, page_size
@@ -183,7 +183,7 @@ async def get_test_run_metrics_list(
     order: str = Query("asc", regex="^asc|desc$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_run_logs(
         project_id, test_run_id, order, order_by, page, page_size
@@ -201,7 +201,7 @@ async def get_test_run_over_time_metric(
     search: list[str] | None = Query(None),
     name: str | None = Query(None),
     key: list[str] | None = Query(None),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_run_over_time_metric(
         project_id, test_run_id, result, search, name, key
@@ -216,7 +216,7 @@ async def get_test_details(
     project_id: UUID,
     test_run_id: UUID,
     test_id: UUID,
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_details(project_id, test_run_id, test_id)
 
@@ -231,7 +231,7 @@ async def get_test_run_metrics_report(
     metrics: list[rs.MetricRequest],
     result: list[str] | None = Query(None),
     search: list[str] | None = Query(None),
-    reporting: dal_v1.Reporting = Depends(dal_v1.get_reporting),
+    reporting: dal.Reporting = Depends(dal.get_reporting),
 ):
     return await reporting.get_test_run_metrics_and_properties(
         project_id, test_run_id, result, search, metrics

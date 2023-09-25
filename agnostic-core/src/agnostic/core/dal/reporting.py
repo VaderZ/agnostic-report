@@ -9,15 +9,15 @@ from sqlalchemy.sql.elements import BinaryExpression
 from sqlalchemy.sql.expression import func, cast, text, and_, case as case_, or_
 from sqlalchemy.types import Float
 
-import agnostic.core.schemas_v1.reporting.logs
-import agnostic.core.schemas_v1.reporting.metrics
-import agnostic.core.schemas_v1.reporting.metrics_ot
-import agnostic.core.schemas_v1.reporting.progress
-import agnostic.core.schemas_v1.reporting.projects
-import agnostic.core.schemas_v1.reporting.test_runs
-import agnostic.core.schemas_v1.reporting.tests
-import agnostic.core.schemas_v1.reporting.widgets
-from agnostic.core import models, schemas_v1
+import agnostic.core.schemas.v1.reporting.logs
+import agnostic.core.schemas.v1.reporting.metrics
+import agnostic.core.schemas.v1.reporting.metrics_ot
+import agnostic.core.schemas.v1.reporting.progress
+import agnostic.core.schemas.v1.reporting.projects
+import agnostic.core.schemas.v1.reporting.test_runs
+import agnostic.core.schemas.v1.reporting.tests
+import agnostic.core.schemas.v1.reporting.widgets
+from agnostic.core import models, schemas
 
 NOT_SET = '<not set>'
 
@@ -106,7 +106,7 @@ class Reporting:
         self.session = session
 
     async def get_projects(self, order_by: str, order: str,
-                           page: int, page_size: int) -> agnostic.core.schemas_v1.reporting.projects.PagedProjects:
+                           page: int, page_size: int) -> agnostic.core.schemas.v1.reporting.projects.PagedProjects:
         pages = (
             await self.session.execute(
                 select(
@@ -134,8 +134,8 @@ class Reporting:
                 ).limit(page_size).offset((page - 1) * page_size)
             )
         ).all()
-        return agnostic.core.schemas_v1.reporting.projects.PagedProjects(
-            data=[agnostic.core.schemas_v1.reporting.projects.ProjectStatistics.model_validate(project) for project in projects],
+        return agnostic.core.schemas.v1.reporting.projects.PagedProjects(
+            data=[agnostic.core.schemas.v1.reporting.projects.ProjectStatistics.model_validate(project) for project in projects],
             count=pages.count,
             pages=pages.pages,
             page=page,
@@ -152,7 +152,7 @@ class Reporting:
                             test_branch: list[str] | None = None,
                             variant: list[str] | None = None,
                             interval: str | None = None,
-                            test_run_id: UUID | None = None) -> agnostic.core.schemas_v1.reporting.test_runs.PagedTestRuns:
+                            test_run_id: UUID | None = None) -> agnostic.core.schemas.v1.reporting.test_runs.PagedTestRuns:
 
         tr_filters, _ = get_test_run_filter(project_id, sut_branch, test_branch, variant, interval, test_run_id)
 
@@ -227,10 +227,10 @@ class Reporting:
                     and ((datetime.datetime.utcnow() - test_run.heartbeat).total_seconds() > alive_interval)) \
                    or (not test_run.finish and not test_run.heartbeat)
 
-        def make_test_run_statistics(test_run) -> agnostic.core.schemas_v1.reporting.test_runs.TestRunsStatistics:
+        def make_test_run_statistics(test_run) -> agnostic.core.schemas.v1.reporting.test_runs.TestRunsStatistics:
             terminated = is_terminated(test_run)
-            tr = agnostic.core.schemas_v1.reporting.test_runs.TestRunsStatistics.model_validate(test_run)
-            status = agnostic.core.schemas_v1.reporting.test_runs.TestRunStatus(
+            tr = agnostic.core.schemas.v1.reporting.test_runs.TestRunsStatistics.model_validate(test_run)
+            status = agnostic.core.schemas.v1.reporting.test_runs.TestRunStatus(
                 running=test_run.finish is None and not terminated,
                 failed=test_run.tests_failed > 0,
                 terminated=terminated
@@ -238,7 +238,7 @@ class Reporting:
             tr.status = status
             return tr
 
-        return agnostic.core.schemas_v1.reporting.test_runs.PagedTestRuns(
+        return agnostic.core.schemas.v1.reporting.test_runs.PagedTestRuns(
             data=[make_test_run_statistics(test_run) for test_run in test_runs],
             count=pages.count,
             pages=pages.pages,
@@ -250,7 +250,7 @@ class Reporting:
                                   sut_branch: list[str] | None = None,
                                   test_branch: list[str] | None = None,
                                   variant: list[str] | None = None,
-                                  interval: str | None = None) -> agnostic.core.schemas_v1.reporting.widgets.TestsOverTime:
+                                  interval: str | None = None) -> agnostic.core.schemas.v1.reporting.widgets.TestsOverTime:
         tr_filters, trunc_to = get_test_run_filter(project_id, sut_branch, test_branch, variant, interval)
 
         by_date = select(
@@ -259,19 +259,19 @@ class Reporting:
             func.count(func.distinct(models.Test.id)).label('total'),
             func.count(
                 func.distinct(models.Test.id)
-            ).filter(models.Test.result == schemas_v1.TestResult.PASSED).label('passed'),
+            ).filter(models.Test.result == schemas.v1.TestResult.PASSED).label('passed'),
             func.count(
                 func.distinct(models.Test.id)
-            ).filter(models.Test.result == schemas_v1.TestResult.FAILED).label('failed'),
+            ).filter(models.Test.result == schemas.v1.TestResult.FAILED).label('failed'),
             func.count(
                 func.distinct(models.Test.id)
-            ).filter(models.Test.result == schemas_v1.TestResult.XPASSED).label('xpassed'),
+            ).filter(models.Test.result == schemas.v1.TestResult.XPASSED).label('xpassed'),
             func.count(
                 func.distinct(models.Test.id)
-            ).filter(models.Test.result == schemas_v1.TestResult.XFAILED).label('xfailed'),
+            ).filter(models.Test.result == schemas.v1.TestResult.XFAILED).label('xfailed'),
             func.count(
                 func.distinct(models.Test.id)
-            ).filter(models.Test.result == schemas_v1.TestResult.SKIPPED).label('skipped'),
+            ).filter(models.Test.result == schemas.v1.TestResult.SKIPPED).label('skipped'),
         ).join(
             models.Test, models.Test.test_run_id == models.TestRun.id
         ).join(
@@ -299,15 +299,15 @@ class Reporting:
             )
         ).first()
 
-        return agnostic.core.schemas_v1.reporting.widgets.TestsOverTime(
-            data=agnostic.core.schemas_v1.reporting.widgets.TestsOverTimeData(
-                series=[agnostic.core.schemas_v1.reporting.widgets.TestsOverTimeSeries(name=name, data=getattr(by_date, name) or []) for name in
+        return agnostic.core.schemas.v1.reporting.widgets.TestsOverTime(
+            data=agnostic.core.schemas.v1.reporting.widgets.TestsOverTimeData(
+                series=[agnostic.core.schemas.v1.reporting.widgets.TestsOverTimeSeries(name=name, data=getattr(by_date, name) or []) for name in
                         ['skipped', 'xfailed', 'xpassed', 'failed', 'passed']],
                 categories=by_date.date or []
             )
         )
 
-    async def get_test_run_filters(self, project_id: UUID, interval: str | None = None) -> agnostic.core.schemas_v1.reporting.test_runs.TestRunFilters:
+    async def get_test_run_filters(self, project_id: UUID, interval: str | None = None) -> agnostic.core.schemas.v1.reporting.test_runs.TestRunFilters:
         tr_filters = get_interval_filter(interval)[1]
         branch_filters = (
             await self.session.execute(
@@ -357,8 +357,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.test_runs.TestRunFilters(
-            data=agnostic.core.schemas_v1.reporting.test_runs.TestRunFiltersData(
+        return agnostic.core.schemas.v1.reporting.test_runs.TestRunFilters(
+            data=agnostic.core.schemas.v1.reporting.test_runs.TestRunFiltersData(
                 sut_branch=sorted(branch_filters.sut_branch) if branch_filters.sut_branch else [],
                 test_branch=sorted(branch_filters.test_branch) if branch_filters.test_branch else [],
                 variant=dict(variant_filters) if variant_filters else []
@@ -371,7 +371,7 @@ class Reporting:
                                   test_branch: list[str] | None = None,
                                   variant: list[str] | None = None,
                                   interval: str | None = None,
-                                  limit: int | None = 5) -> agnostic.core.schemas_v1.reporting.widgets.TopFailedTests:
+                                  limit: int | None = 5) -> agnostic.core.schemas.v1.reporting.widgets.TopFailedTests:
 
         tr_filters, _ = get_test_run_filter(project_id, sut_branch, test_branch, variant, interval)
 
@@ -382,7 +382,7 @@ class Reporting:
             func.count(
                 func.distinct(models.Test.id)
             ).filter(
-                models.Test.result == schemas_v1.TestResult.FAILED
+                models.Test.result == schemas.v1.TestResult.FAILED
             ).label('failed')
         ).join(
             models.TestRun, models.Test.test_run_id == models.TestRun.id, isouter=True
@@ -396,7 +396,7 @@ class Reporting:
             func.count(
                 func.distinct(models.Test.id)
             ).filter(
-                models.Test.result == schemas_v1.TestResult.FAILED
+                models.Test.result == schemas.v1.TestResult.FAILED
             ) > 0
         ).subquery()
 
@@ -416,8 +416,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.widgets.TopFailedTests(
-            data=[agnostic.core.schemas_v1.reporting.widgets.TopFailedTestsData.model_validate(test) for test in top_failed]
+        return agnostic.core.schemas.v1.reporting.widgets.TopFailedTests(
+            data=[agnostic.core.schemas.v1.reporting.widgets.TopFailedTestsData.model_validate(test) for test in top_failed]
         )
 
     async def get_project_metrics(self,
@@ -427,7 +427,7 @@ class Reporting:
                                   variant: list[str] | None = None,
                                   interval: str | None = None,
                                   metrics: list[
-                                               agnostic.core.schemas_v1.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas_v1.reporting.metrics.MetricsAggregate:
+                                               agnostic.core.schemas.v1.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas.v1.reporting.metrics.MetricsAggregate:
         tr_filters, trunc_to = get_test_run_filter(project_id, sut_branch, test_branch, variant, interval)
 
         trs = select(
@@ -490,14 +490,14 @@ class Reporting:
             )
         ).first()
 
-        result = agnostic.core.schemas_v1.reporting.metrics.MetricsAggregate(data=[])
+        result = agnostic.core.schemas.v1.reporting.metrics.MetricsAggregate(data=[])
         for metric in metrics:
             if metric.table == 'metrics':
                 table = project_metrics
             else:
                 table = project_ot_metrics
             result.data.append(
-                agnostic.core.schemas_v1.reporting.metrics.MetricsData(
+                agnostic.core.schemas.v1.reporting.metrics.MetricsData(
                     name=metric.title,
                     value=getattr(table, metric.title)
                 )
@@ -509,7 +509,7 @@ class Reporting:
                                   project_id: UUID,
                                   test_run_id: UUID,
                                   result: list[str] | None,
-                                  search: list[str] | None) -> agnostic.core.schemas_v1.reporting.widgets.TestsByResult:
+                                  search: list[str] | None) -> agnostic.core.schemas.v1.reporting.widgets.TestsByResult:
         by_result = (
             await self.session.execute(
                 select(
@@ -522,11 +522,11 @@ class Reporting:
                 ).order_by(
                     case_(
                         {
-                            schemas_v1.TestResult.PASSED: 1,
-                            schemas_v1.TestResult.FAILED: 2,
-                            schemas_v1.TestResult.XPASSED: 3,
-                            schemas_v1.TestResult.XFAILED: 4,
-                            schemas_v1.TestResult.SKIPPED: 5
+                            schemas.v1.TestResult.PASSED: 1,
+                            schemas.v1.TestResult.FAILED: 2,
+                            schemas.v1.TestResult.XPASSED: 3,
+                            schemas.v1.TestResult.XFAILED: 4,
+                            schemas.v1.TestResult.SKIPPED: 5
                         },
                         value=models.Test.result,
                         else_=6
@@ -535,8 +535,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.widgets.TestsByResult(
-            data=agnostic.core.schemas_v1.reporting.widgets.TestsByResultData(
+        return agnostic.core.schemas.v1.reporting.widgets.TestsByResult(
+            data=agnostic.core.schemas.v1.reporting.widgets.TestsByResultData(
                series=[result.value for result in by_result],
                labels=[result.label for result in by_result]
             )
@@ -550,7 +550,7 @@ class Reporting:
                         order: str,
                         order_by: str,
                         page: int,
-                        page_size: int) -> agnostic.core.schemas_v1.reporting.tests.PagedTests:
+                        page_size: int) -> agnostic.core.schemas.v1.reporting.tests.PagedTests:
 
         test_filters = and_(*get_test_filter(test_run_id, result, search))
 
@@ -589,8 +589,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.tests.PagedTests(
-            data=[agnostic.core.schemas_v1.reporting.tests.TestsStatistics.model_validate(test) for test in tests],
+        return agnostic.core.schemas.v1.reporting.tests.PagedTests(
+            data=[agnostic.core.schemas.v1.reporting.tests.TestsStatistics.model_validate(test) for test in tests],
             count=pages.count,
             pages=pages.pages,
             page=page,
@@ -603,7 +603,7 @@ class Reporting:
                                         order: str,
                                         order_by: str,
                                         page: int,
-                                        page_size: int) -> agnostic.core.schemas_v1.reporting.metrics.PagedTestRunMetricsList:
+                                        page_size: int) -> agnostic.core.schemas.v1.reporting.metrics.PagedTestRunMetricsList:
         pages = (
             await self.session.execute(
                 select(
@@ -640,13 +640,13 @@ class Reporting:
 
         data = []
         for metric in metrics:
-            data.append(agnostic.core.schemas_v1.reporting.metrics.TestRunMetricsListStatistics(
+            data.append(agnostic.core.schemas.v1.reporting.metrics.TestRunMetricsListStatistics(
                 name=metric.name,
                 value=metric.value,
                 description=metric.description.format(metric.value)
             ))
 
-        return agnostic.core.schemas_v1.reporting.metrics.PagedTestRunMetricsList(
+        return agnostic.core.schemas.v1.reporting.metrics.PagedTestRunMetricsList(
             data=data,
             count=pages.count,
             pages=pages.pages,
@@ -662,7 +662,7 @@ class Reporting:
                                     order: str,
                                     order_by: str,
                                     page: int,
-                                    page_size: int) -> agnostic.core.schemas_v1.reporting.progress.PagedTestRunProgressRecords:
+                                    page_size: int) -> agnostic.core.schemas.v1.reporting.progress.PagedTestRunProgressRecords:
         if (result and len(result) < 6) or not result or search:
             filters = and_(*get_test_filter(test_run_id, result, search))
         else:
@@ -706,8 +706,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.progress.PagedTestRunProgressRecords(
-            data=[agnostic.core.schemas_v1.reporting.progress.TestRunProgressRecord.model_validate(record) for record in progress],
+        return agnostic.core.schemas.v1.reporting.progress.PagedTestRunProgressRecords(
+            data=[agnostic.core.schemas.v1.reporting.progress.TestRunProgressRecord.model_validate(record) for record in progress],
             count=pages.count,
             pages=pages.pages,
             page=page,
@@ -720,7 +720,7 @@ class Reporting:
                                 order: str,
                                 order_by: str,
                                 page: int,
-                                page_size: int) -> agnostic.core.schemas_v1.reporting.logs.PagedTestRunLog:
+                                page_size: int) -> agnostic.core.schemas.v1.reporting.logs.PagedTestRunLog:
         pages = (
             await self.session.execute(
                 select(
@@ -755,8 +755,8 @@ class Reporting:
             )
         ).all()
 
-        return agnostic.core.schemas_v1.reporting.logs.PagedTestRunLog(
-            data=[agnostic.core.schemas_v1.reporting.logs.TestRunLog.model_validate(log) for log in logs],
+        return agnostic.core.schemas.v1.reporting.logs.PagedTestRunLog(
+            data=[agnostic.core.schemas.v1.reporting.logs.TestRunLog.model_validate(log) for log in logs],
             count=pages.count,
             pages=pages.pages,
             page=page,
@@ -771,7 +771,7 @@ class Reporting:
                                             name: str | None,
                                             key: list[str] | None):
         if not name or not key:
-            return agnostic.core.schemas_v1.reporting.metrics_ot.MetricOverTimeReport()
+            return agnostic.core.schemas.v1.reporting.metrics_ot.MetricOverTimeReport()
 
         if (result and len(result) < 6) or not result or search:
             filters = and_(models.MetricOverTime.name == name, *get_test_filter(test_run_id, result, search))
@@ -798,9 +798,9 @@ class Reporting:
             )
         ).first()
 
-        return agnostic.core.schemas_v1.reporting.metrics_ot.MetricOverTimeReport(
-            data=agnostic.core.schemas_v1.reporting.metrics_ot.MetricOverTimeData(
-                series=[agnostic.core.schemas_v1.reporting.metrics_ot.MetricOverTimeSeries(name=k, data=getattr(series, k) or []) for k in key],
+        return agnostic.core.schemas.v1.reporting.metrics_ot.MetricOverTimeReport(
+            data=agnostic.core.schemas.v1.reporting.metrics_ot.MetricOverTimeData(
+                series=[agnostic.core.schemas.v1.reporting.metrics_ot.MetricOverTimeSeries(name=k, data=getattr(series, k) or []) for k in key],
                 categories=series.date or []
             )
         )
@@ -808,7 +808,7 @@ class Reporting:
     async def get_test_details(self,
                                project_id: UUID,
                                test_run_id: UUID,
-                               test_id: UUID) -> agnostic.core.schemas_v1.reporting.tests.TestReport:
+                               test_id: UUID) -> agnostic.core.schemas.v1.reporting.tests.TestReport:
 
         attachments = select(
             models.Attachment.id,
@@ -903,7 +903,7 @@ class Reporting:
             return datetime.datetime.fromisoformat(timestamp + (26 - len(timestamp)) * '0')
 
         # TODO: Figure out how to carry sorting through json aggregate in SQL
-        return agnostic.core.schemas_v1.reporting.tests.TestReport(
+        return agnostic.core.schemas.v1.reporting.tests.TestReport(
             details=test.details,
             attachments=sorted(test.attachments, key=lambda a: a.get('name', '')) if test.attachments[0] else [],
             logs=sorted(test.logs, key=lambda l: l.get('name', '')) if test.logs[0] else [],
@@ -919,7 +919,8 @@ class Reporting:
                                                   test_run_id: UUID,
                                                   result: list[str] | None,
                                                   search: list[str] | None,
-                                                  metrics: list[agnostic.core.schemas_v1.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas_v1.reporting.metrics.MetricsAggregate:
+                                                  metrics: list[
+                                                               agnostic.core.schemas.v1.reporting.metrics.MetricRequest] | None = None) -> agnostic.core.schemas.v1.reporting.metrics.MetricsAggregate:
         test_filters = and_(*get_test_filter(test_run_id, result, search))
 
         tests = select(
@@ -993,7 +994,7 @@ class Reporting:
             )
         ).first()
 
-        result = agnostic.core.schemas_v1.reporting.metrics.MetricsAggregate(data=[])
+        result = agnostic.core.schemas.v1.reporting.metrics.MetricsAggregate(data=[])
         for metric in metrics:
             if metric.table == 'metrics':
                 table = tr_metrics
@@ -1002,7 +1003,7 @@ class Reporting:
             else:
                 table = tr_ot_metrics
             result.data.append(
-                agnostic.core.schemas_v1.reporting.metrics.MetricsData(
+                agnostic.core.schemas.v1.reporting.metrics.MetricsData(
                     name=metric.title,
                     value=getattr(table, metric.title)
                 )
