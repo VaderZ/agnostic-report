@@ -117,9 +117,14 @@ async def download_test_run_log(project_id: UUID, test_run_id: UUID, log_id: UUI
 
 
 @router.get('/projects/{project_id}/test-runs/{test_run_id}/logs/{log_id}/body')
-async def get_test_run_log(project_id: UUID, test_run_id: UUID, log_id: UUID,
-                           offset: int | None = Query(0), limit: int | None = Query(None),
-                           logs: dal.Logs = Depends(dal.get_logs)):
+async def get_test_run_log_body(
+        project_id: UUID,
+        test_run_id: UUID,
+        log_id: UUID,
+        offset: int | None = Query(0),
+        limit: int | None = Query(None),
+        logs: dal.Logs = Depends(dal.get_logs)
+):
     try:
         return await logs.get_body(log_id, offset, limit)
     except dal.NotFoundError as e:

@@ -4,5 +4,5 @@ router = APIRouter(tags=['System'])
 
 
 @router.get('/ping')
-async def pong():
+async def ping():
     return {'ping': 'pong!'}

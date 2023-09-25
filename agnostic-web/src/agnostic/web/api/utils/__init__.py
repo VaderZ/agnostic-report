@@ -1,6 +1,8 @@
 import os
 import typing
 
+from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
 
 
@@ -20,3 +22,10 @@ class SPA(StaticFiles):
                 full_path = os.path.realpath(os.path.join(directory, 'index.html'))
                 return full_path, os.stat(full_path)
         return "", None
+
+
+# https://fastapi.tiangolo.com/advanced/path-operation-advanced-configuration/
+def simplify_operation_ids(app: FastAPI) -> None:
+    for route in app.routes:
+        if isinstance(route, APIRoute):
+            route.operation_id = route.name
