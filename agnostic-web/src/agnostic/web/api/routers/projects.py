@@ -75,7 +75,7 @@ async def update_project(
     },
     status_code=status.HTTP_204_NO_CONTENT
 )
-async def update_project_fields(
+async def patch_project(
     project: schemas.ProjectUpdate,
     project_id: UUID,
     projects: dal.Projects = Depends(dal.get_projects),
