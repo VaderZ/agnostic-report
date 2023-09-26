@@ -7,7 +7,7 @@ from starlette import concurrency
 
 from agnostic.core import config
 from agnostic.core.migrations import upgrade
-from .routers import v1
+from .routers import v1, v2
 from .utils import SPA, simplify_operation_ids
 
 base_dir = Path(__file__).parent
@@ -37,9 +37,15 @@ api_v1.include_router(v1.system.router)
 
 simplify_operation_ids(api_v1)
 
+api_v2 = FastAPI(ptitle='Agnostic Report', default_response_class=ORJSONResponse)
+api_v2.include_router(v2.projects.router)
+
 app = FastAPI(title='Agnostic Report', version='1.0')
 app.mount('/api/v1', api_v1)
+app.mount('/api/v2', api_v2)
 app.mount('/', SPA(directory=base_dir / '..' / 'ui', html=True), name='ui')
+
+simplify_operation_ids(api_v2)
 
 
 @app.on_event('startup')
