@@ -1,8 +1,17 @@
-__all__ = ["Base", "BaseRoot", "Timestamp", "KeyValue", "StringValue"]
+__all__ = [
+    "Base",
+    "BaseRoot",
+    "CRUDCollection",
+    "Timestamp",
+    "KeyValue",
+    "NameValue",
+    "StringValue",
+]
 import datetime
 import typing
+from dataclasses import dataclass
 
-from pydantic import BaseModel, RootModel, ConfigDict
+from pydantic import BaseModel, RootModel, ConfigDict, Field
 
 
 class Base(BaseModel):
@@ -19,14 +28,27 @@ class BaseRoot(RootModel):
         return self.root[item]
 
 
-class Timestamp(BaseModel):
-    timestamp: datetime.datetime | None
+@dataclass(slots=True)
+class CRUDCollection:
+    count: int
+    items: BaseRoot
 
 
-class KeyValue(BaseModel):
+class Timestamp(Base):
+    timestamp: datetime.datetime | None = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.UTC)
+    )
+
+
+class KeyValue(Base):
     key: str
     value: typing.Any
 
 
-class StringValue(BaseModel):
+class NameValue(Base):
+    name: str
+    value: typing.Any
+
+
+class StringValue(Base):
     value: str

@@ -1,8 +1,14 @@
 from agnostic.core.session import async_session
-from .projects import Projects
 from .exceptions import CRUDException, DuplicateError, ForeignKeyError, NotFoundError
+from .projects import Projects
+from .test_runs import TestRuns
 
 
 async def get_projects():
     async with async_session() as session:
         yield Projects(session)
+
+
+async def get_test_runs():
+    async with async_session() as session:
+        yield TestRuns(session)

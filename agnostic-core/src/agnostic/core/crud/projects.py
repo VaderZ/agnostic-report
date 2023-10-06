@@ -1,6 +1,4 @@
 import uuid
-from dataclasses import dataclass
-from typing import Any
 
 from sqlalchemy import select, update, func
 from sqlalchemy.exc import IntegrityError
@@ -9,12 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from agnostic.core import models as m
 from agnostic.core.schemas import v2 as s
 from .exceptions import DuplicateError, NotFoundError
-
-
-@dataclass(slots=True)
-class CRUDCollection:
-    count: int
-    items: Any
 
 
 class Projects:
@@ -31,7 +23,7 @@ class Projects:
 
         return s.Project.model_validate(project)
 
-    async def get_all(self, page: int = 1, page_size: int = 100) -> CRUDCollection:
+    async def get_all(self, page: int = 1, page_size: int = 100) -> s.CRUDCollection:
         count = (await self.session.execute(select(func.count(m.Project.id)))).scalar()
         projects = (
             (
@@ -45,7 +37,7 @@ class Projects:
             .scalars()
             .all()
         )
-        return CRUDCollection(count=count, items=s.Projects.model_validate(projects))
+        return s.CRUDCollection(count=count, items=s.Projects.model_validate(projects))
 
     async def create(self, project: s.ProjectCreate | s.ProjectUpdate) -> uuid.UUID:
         project = m.Project(**project.model_dump())
