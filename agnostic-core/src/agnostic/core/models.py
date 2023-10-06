@@ -3,7 +3,7 @@ import uuid
 from decimal import Decimal
 
 from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey, Integer, UniqueConstraint, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BYTEA, JSONB
+from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BYTEA, JSONB, TIMESTAMP
 from sqlalchemy.ext.declarative import as_declarative
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.sql import column, text
@@ -43,9 +43,9 @@ class TestRun(Base):
         nullable=False,
         index=True
     )
-    start: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, index=True)
-    finish: Mapped[datetime.datetime | None] = mapped_column(DateTime)
-    heartbeat: Mapped[datetime.datetime | None] = mapped_column(DateTime)
+    start: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, index=True)
+    finish: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True))
+    heartbeat: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True))
     keep_forever: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text('false'))
     sut_version: Mapped[str | None] = mapped_column(String(128))
     sut_branch: Mapped[str | None] = mapped_column(String(128))
@@ -83,8 +83,8 @@ class Test(Base):
         nullable=False,
         index=True
     )
-    start: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
-    finish: Mapped[datetime.datetime | None] = mapped_column(DateTime)
+    start: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
+    finish: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True))
     path: Mapped[str] = mapped_column(String(512), nullable=False)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     result: Mapped[str | None] = mapped_column(String(8))
@@ -104,8 +104,8 @@ class Log(Base):
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     name: Mapped[str] = mapped_column(String(256), nullable=False)
-    start: Mapped[datetime.datetime | None] = mapped_column(DateTime)
-    finish: Mapped[datetime.datetime | None] = mapped_column(DateTime)
+    start: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True))
+    finish: Mapped[datetime.datetime | None] = mapped_column(TIMESTAMP(timezone=True))
     body: Mapped[str] = mapped_column(Text)
 
 
@@ -119,7 +119,7 @@ class Metric(Base):
         index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     value: Mapped[Decimal] = mapped_column(DOUBLE_PRECISION, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
@@ -136,7 +136,7 @@ class Request(Base):
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     request_type: Mapped[str] = mapped_column(String(128), nullable=False)
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     contents: Mapped[dict] = mapped_column(JSONB, nullable=False)
 
 
@@ -150,7 +150,7 @@ class Progress(Base):
         index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     level: Mapped[str] = mapped_column(String(10), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     details: Mapped[str | None] = mapped_column(Text)
@@ -166,7 +166,7 @@ class Attachment(Base):
         index=True
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     name: Mapped[str] = mapped_column(String(512), nullable=False)
     mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
     size: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -184,5 +184,5 @@ class MetricOverTime(Base):
     )
     test_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     name: Mapped[str] = mapped_column(String(128), nullable=False)
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     values: Mapped[dict] = mapped_column(JSONB, nullable=False)
