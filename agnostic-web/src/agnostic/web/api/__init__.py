@@ -40,6 +40,7 @@ simplify_operation_ids(api_v1)
 api_v2 = FastAPI(ptitle='Agnostic Report', default_response_class=ORJSONResponse)
 api_v2.include_router(v2.projects.router)
 api_v2.include_router(v2.test_runs.router)
+api_v2.include_router(v2.tests.router)
 
 app = FastAPI(title='Agnostic Report', version='1.0')
 app.mount('/api/v1', api_v1)
