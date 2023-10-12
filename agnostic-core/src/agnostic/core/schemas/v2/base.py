@@ -9,7 +9,6 @@ __all__ = [
 ]
 import datetime
 import typing
-from dataclasses import dataclass
 
 from pydantic import BaseModel, RootModel, ConfigDict, Field
 
@@ -28,8 +27,7 @@ class BaseRoot(RootModel):
         return self.root[item]
 
 
-@dataclass(slots=True)
-class CRUDCollection:
+class CRUDCollection(Base):
     count: int
     items: BaseRoot
 
