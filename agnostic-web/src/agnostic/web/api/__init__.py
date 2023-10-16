@@ -40,6 +40,7 @@ api_v2.include_router(v2.projects.router)
 api_v2.include_router(v2.test_runs.router)
 api_v2.include_router(v2.tests.router)
 api_v2.include_router(v2.metrics.router)
+api_v2.include_router(v2.progress.router)
 
 simplify_operation_ids(api_v2)
 

@@ -1,6 +1,7 @@
 from agnostic.core.session import async_session
 from .exceptions import CRUDException, DuplicateError, ForeignKeyError, NotFoundError
 from .metrics import Metrics
+from .progress import Progress
 from .projects import Projects
 from .test_runs import TestRuns
 from .tests import Tests
@@ -24,3 +25,8 @@ async def get_tests():
 async def get_metrics():
     async with async_session() as session:
         yield Metrics(session)
+
+
+async def get_progress():
+    async with async_session() as session:
+        yield Progress(session)
