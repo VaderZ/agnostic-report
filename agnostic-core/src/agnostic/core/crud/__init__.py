@@ -1,4 +1,5 @@
 from agnostic.core.session import async_session
+from .attachments import Attachments
 from .exceptions import CRUDException, DuplicateError, ForeignKeyError, NotFoundError
 from .logs import Logs
 from .metrics import Metrics
@@ -36,3 +37,8 @@ async def get_progress():
 async def get_logs():
     async with async_session() as session:
         yield Logs(session)
+
+
+async def get_attachments():
+    async with async_session() as session:
+        yield Attachments(session)

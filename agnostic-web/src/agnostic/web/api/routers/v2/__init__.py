@@ -1,3 +1,4 @@
+from . import attachments
 from . import logs
 from . import metrics
 from . import progress

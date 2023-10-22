@@ -1,3 +1,4 @@
+from .attachments import *
 from .base import *
 from .logs import *
 from .metrics import *
